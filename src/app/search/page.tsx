@@ -197,10 +197,10 @@ export default function SearchPage() {
                       <Avatar className="h-14 w-14">
                         <AvatarImage
                           src={user.profilePictureUrl || undefined}
-                          alt={user.displayName || user.username || "User Avatar"}
+                          alt={user.displayName ?? user.username ?? "User Avatar"}
                         />
                         <AvatarFallback>
-                          {(user.displayName || user.username || "U")
+                          {(user.displayName ?? user.username ?? "U")
                             .charAt(0)
                             .toUpperCase()}
                         </AvatarFallback>

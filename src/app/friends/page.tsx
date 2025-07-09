@@ -54,18 +54,18 @@ const UserListItem: React.FC<UserListItemProps> = ({
       >
         <Avatar className="h-14 w-14">
           <AvatarImage
-            src={user.profilePictureUrl || undefined}
-            alt={user.displayName || user.username || "User Avatar"}
+            src={user.profilePictureUrl ?? undefined}
+            alt={user.displayName ?? user.username ?? "User Avatar"}
           />
           <AvatarFallback>
-            {(user.displayName || user.username || "U")
+            {(user.displayName ?? user.username ?? "U")
               .charAt(0)
               .toUpperCase()}
           </AvatarFallback>
         </Avatar>
         <div>
           <p className="font-semibold text-foreground">
-            {user.displayName || user.username}
+            {user.displayName ?? user.username}
           </p>
           <p className="text-sm text-muted-foreground">@{user.username}</p>
         </div>
@@ -131,8 +131,8 @@ export default function FriendsPage() {
         await unfollowUser({ followingId: targetUserId });
         toast.success(
           `Unfollowed @${
-            (following || []).find((f) => f?._id === targetUserId)?.username || // Added (following || []) and null check for 'f'
-            (followers || []).find((f) => f?._id === targetUserId)?.username || // Added (followers || []) and null check for 'f'
+            (following ?? []).find((f) => f?._id === targetUserId)?.username ?? // Added (following ?? []) and null check for 'f'
+            (followers ?? []).find((f) => f?._id === targetUserId)?.username ?? // Added (followers ?? []) and null check for 'f'
             "user"
           }.`,
         );
@@ -140,16 +140,16 @@ export default function FriendsPage() {
         await followUser({ followingId: targetUserId });
         toast.success(
           `Now following @${
-            (following || []).find((f) => f?._id === targetUserId)?.username || // Added (following || []) and null check for 'f'
-            (followers || []).find((f) => f?._id === targetUserId)?.username || // Added (followers || []) and null check for 'f'
+            (following ?? []).find((f) => f?._id === targetUserId)?.username ?? // Added (following ?? []) and null check for 'f'
+            (followers ?? []).find((f) => f?._id === targetUserId)?.username ?? // Added (followers ?? []) and null check for 'f'
             "user"
           }.`,
         );
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to toggle follow status:", error);
       toast.error("Failed to update follow status.", {
-        description: error.message || "An unexpected error occurred.",
+        description: "An unexpected error occurred.",
       });
     } finally {
       setActionLoadingId(null);
@@ -231,11 +231,11 @@ export default function FriendsPage() {
           <Tabs defaultValue="following" className="w-full">
             <TabsList className="grid w-full grid-cols-2 shadow-soft">
               <TabsTrigger value="following" className="shadow-inset-soft">
-                Following ({following.length || 0}){" "}
+                Following ({following.length ?? 0}){" "}
                 {/* `following` is UserDoc[] here */}
               </TabsTrigger>
               <TabsTrigger value="followers" className="shadow-inset-soft">
-                Followers ({followers.length || 0}){" "}
+                Followers ({followers.length ?? 0}){" "}
                 {/* `followers` is UserDoc[] here */}
               </TabsTrigger>
             </TabsList>
@@ -246,7 +246,7 @@ export default function FriendsPage() {
               {following.length === 0 ? (
                 <div className="flex flex-col items-center gap-4 py-8 text-center text-muted-foreground">
                   <UserPlus className="h-12 w-12" />
-                  <p className="text-lg">You're not following anyone yet!</p>
+                  <p className="text-lg">You&apos;re not following anyone yet!</p>
                   <Link href="/search">
                     <Button className="shadow-soft hover:scale-[1.02]">
                       Find People to Follow

@@ -51,9 +51,9 @@ export const getMyListeningHistory = query({
         return {
           ...entry,
           song: {
-            title: song?.title || "Unknown Song",
-            artist: artist?.name || "Unknown Artist",
-            album: album?.title || "Unknown Album",
+            title: song?.title ?? "Unknown Song",
+            artist: artist?.name ?? "Unknown Artist",
+            album: album?.title ?? "Unknown Album",
             coverImageUrl: album?.coverImageUrl,
             previewUrl: song?.previewUrl,
             durationMs: song?.durationMs,
@@ -96,9 +96,9 @@ export const getUserRecentlyListened = query({
         return {
           ...entry,
           song: {
-            title: song?.title || "Unknown Song",
-            artist: artist?.name || "Unknown Artist",
-            album: album?.title || "Unknown Album",
+            title: song?.title ?? "Unknown Song",
+            artist: artist?.name ?? "Unknown Artist",
+            album: album?.title ?? "Unknown Album",
             coverImageUrl: album?.coverImageUrl,
             previewUrl: song?.previewUrl,
             durationMs: song?.durationMs,
@@ -169,9 +169,9 @@ export const getFriendFeed = query({
           _id: userDoc._id, // User's ID is the primary key for feed entry
           listenedAt: userDoc.recentListen!,
           song: {
-            title: song?.title || "Unknown Song",
-            artist: artist?.name || "Unknown Artist",
-            album: album?.title || "Unknown Album",
+            title: song?.title ?? "Unknown Song",
+            artist: artist?.name ?? "Unknown Artist",
+            album: album?.title ?? "Unknown Album",
             coverImageUrl: album?.coverImageUrl,
             previewUrl: song?.previewUrl,
             durationMs: song?.durationMs,

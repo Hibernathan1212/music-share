@@ -165,7 +165,7 @@ export const createOrUpdateUserInternal = internalMutation({
         // if (!existingUser.username) { username: args.username }
         // For simplicity, let's assume Clerk webhook might pass an initial username.
         // If you want user to ALWAYS explicitly set it:
-        // username: existingUser.username || "", // Keep existing if not empty
+        // username: existingUser.username ?? "", // Keep existing if not empty
       });
       return existingUser._id;
     } else {

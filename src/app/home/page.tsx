@@ -91,7 +91,7 @@ export default async function HomePage() {
         {/* Right Column: Friend Feed */}
         <section className="w-full rounded-lg border border-border bg-card p-6 shadow-lg-soft md:w-2/3">
           <h2 className="mb-5 text-2xl font-bold text-primary">
-            Friends' Listening Stream
+            Friends&apos; Listening Stream
           </h2>
           <Suspense
             fallback={

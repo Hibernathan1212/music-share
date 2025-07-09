@@ -47,7 +47,7 @@ export function NowPlayingDisplay() {
     } catch (err: any) {
       console.error("Failed to fetch current playing:", err);
       const errorMessage =
-        err.message || "Failed to fetch currently playing music.";
+        err.message ?? "Failed to fetch currently playing music.";
       setError(errorMessage);
       setCurrentPlaying(null);
       toast.error("Failed to fetch Spotify status", {

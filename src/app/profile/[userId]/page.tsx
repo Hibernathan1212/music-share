@@ -119,7 +119,7 @@ export default function PublicProfilePage() {
     } catch (error: any) {
       console.error("Failed to toggle follow status:", error);
       toast.error("Failed to update follow status.", {
-        description: error.message || "An unexpected error occurred.",
+        description: error.message ?? "An unexpected error occurred.",
       });
     } finally {
       setIsFollowActionLoading(false);
@@ -223,7 +223,7 @@ export default function PublicProfilePage() {
             </Button>
           </Link>
           <CardTitle className="text-3xl font-bold text-primary">
-            {viewedUser.displayName || viewedUser.username}'s Profile
+            {viewedUser.displayName ?? viewedUser.username}&apos;s Profile
           </CardTitle>
           <div className="w-[88px]" /> {/* Spacer */}
         </CardHeader>
@@ -232,17 +232,17 @@ export default function PublicProfilePage() {
           <div className="flex flex-col items-center gap-4">
             <Avatar className="h-32 w-32 border-2 border-primary shadow-lg-soft">
               <AvatarImage
-                src={viewedUser.profilePictureUrl || undefined}
-                alt={viewedUser.displayName || viewedUser.username || "User Avatar"}
+                src={viewedUser.profilePictureUrl ?? undefined}
+                alt={viewedUser.displayName ?? viewedUser.username ?? "User Avatar"}
               />
               <AvatarFallback className="text-5xl">
-                {(viewedUser.displayName || viewedUser.username || "U")
+                {(viewedUser.displayName ?? viewedUser.username ?? "U")
                   .charAt(0)
                   .toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <h3 className="text-3xl font-bold text-foreground">
-              {viewedUser.displayName || viewedUser.username}
+              {viewedUser.displayName ?? viewedUser.username}
             </h3>
             <p className="text-xl text-muted-foreground">
               @{viewedUser.username}
@@ -273,7 +273,7 @@ export default function PublicProfilePage() {
             )}
           </div>
 
-          {(viewedUser.bio || (recentlyListened && recentlyListened.length > 0)) ? (
+          {(viewedUser.bio ?? (recentlyListened && recentlyListened.length > 0)) ? (
             <div className="space-y-6">
               {viewedUser.bio && (
                 <section className="rounded-lg border border-border p-4 shadow-soft">
@@ -294,9 +294,9 @@ export default function PublicProfilePage() {
                       <SongDisplay
                         key={String(entry._id)}
                         song={{
-                          title: entry.song?.title || "Unknown Song",
-                          artist: entry.song?.artist || "Unknown Artist",
-                          album: entry.song?.album || "Unknown Album",
+                          title: entry.song?.title ?? "Unknown Song",
+                          artist: entry.song?.artist ?? "Unknown Artist",
+                          album: entry.song?.album ?? "Unknown Album",
                           coverImageUrl: entry.song?.coverImageUrl,
                         }}
                         listenedAt={entry.listenedAt}

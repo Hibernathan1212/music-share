@@ -111,7 +111,7 @@ export default function MyProfilePage() {
     if (convexUser && !initialLoadComplete) {
       reset({
         // Use reset to set form values from fetched data, and mark form as not dirty
-        username: convexUser.username || "",
+        username: convexUser.username ?? "",
         displayName: convexUser.displayName || null, // Ensure null
         bio: convexUser.bio || null, // Ensure null
         profilePictureUrl: convexUser.profilePictureUrl || null, // Ensure null
@@ -187,7 +187,7 @@ export default function MyProfilePage() {
     } catch (error: any) {
       console.error("Failed to update profile:", error);
       toast.error("Failed to update profile.", {
-        description: error.message || "An unexpected error occurred.",
+        description: error.message ?? "An unexpected error occurred.",
       });
     } finally {
       setIsSaving(false);
@@ -288,19 +288,19 @@ export default function MyProfilePage() {
             <Avatar className="h-28 w-28 border-2 border-primary shadow-lg-soft">
               <AvatarImage
                 src={watch("profilePictureUrl") || clerkUser?.imageUrl || undefined}
-                alt={watch("displayName") || watch("username") || "User Avatar"}
+                alt={watch("displayName") ?? watch("username") ?? "User Avatar"}
               />
               <AvatarFallback className="text-4xl">
-                {(watch("displayName") || watch("username") || "U")
+                {(watch("displayName") ?? watch("username") ?? "U")
                   .charAt(0)
                   .toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <h3 className="text-2xl font-bold text-foreground">
-              {watch("displayName") || watch("username") || "Set Your Name"}
+              {watch("displayName") ?? watch("username") ?? "Set Your Name"}
             </h3>
             <p className="text-md text-muted-foreground">
-              @{watch("username") || "username_needed"}
+              @{watch("username") ?? "username_needed"}
             </p>
           </div>
 
@@ -424,7 +424,7 @@ export default function MyProfilePage() {
                     setIsEditing(false);
                     reset({
                       // Reset to current Convex user values
-                      username: convexUser.username || "",
+                      username: convexUser.username ?? "",
                       displayName: convexUser.displayName || null,
                       bio: convexUser.bio || null,
                       profilePictureUrl: convexUser.profilePictureUrl || null,

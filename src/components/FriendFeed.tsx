@@ -138,13 +138,13 @@ export function FriendFeed() {
         <SongDisplay
           key={String(entry._id)} // _id is now the user's _id from friendFeed structure
           song={{
-            title: entry.song?.title || "Unknown Song",
-            artist: entry.song?.artist || "Unknown Artist",
-            album: entry.song?.album || "Unknown Album",
+            title: entry.song?.title ?? "Unknown Song",
+            artist: entry.song?.artist ?? "Unknown Artist",
+            album: entry.song?.album ?? "Unknown Album",
             coverImageUrl: entry.song?.coverImageUrl,
           }}
           listeningUser={{
-            username: entry.listeningUser?.username || "Unknown",
+            username: entry.listeningUser?.username ?? "Unknown",
             displayName: entry.listeningUser?.displayName,
             profilePictureUrl: entry.listeningUser?.profilePictureUrl,
           }}
