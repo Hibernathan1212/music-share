@@ -16,11 +16,68 @@ import type { Query } from "convex/server"; // Import Query for typing `q`
 const ENCRYPTION_KEY = env.ENCRYPTION_KEY;
 
 async function encrypt(text: string): Promise<string> {
-  return Buffer.from(text).toString("base64");
+  if (!ENCRYPTION_KEY) {
+    throw new Error("ENCRYPTION_KEY is not configured");
+  }
+  
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32)),
+    { name: 'AES-GCM' },
+    false,
+    ['encrypt']
+  );
+  
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    cryptoKey,
+    data
+  );
+  
+  const combined = new Uint8Array(iv.length + encrypted.byteLength);
+  combined.set(iv);
+  combined.set(new Uint8Array(encrypted), iv.length);
+  
+  const binaryString = String.fromCharCode(...combined);
+  return btoa(binaryString);
 }
 
 async function decrypt(encryptedText: string): Promise<string> {
-  return Buffer.from(encryptedText, "base64").toString("utf8");
+  if (!ENCRYPTION_KEY) {
+    throw new Error("ENCRYPTION_KEY is not configured");
+  }
+  
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+  
+  const binaryString = atob(encryptedText);
+  const combined = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    combined[i] = binaryString.charCodeAt(i);
+  }
+  
+  const iv = combined.slice(0, 12);
+  const encrypted = combined.slice(12);
+  
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32)),
+    { name: 'AES-GCM' },
+    false,
+    ['decrypt']
+  );
+  
+  const decrypted = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv },
+    cryptoKey,
+    encrypted
+  );
+  
+  return decoder.decode(decrypted);
 }
 
 const SPOTIFY_API_BASE_URL = "https://api.spotify.com/v1";
@@ -33,26 +90,33 @@ export const handleSpotifyCallback = action({
   },
   handler: async (ctx, args) => {
     try {
+      // Create the request body as a properly formatted URLSearchParams
+      const params = new URLSearchParams();
+      params.append('grant_type', 'authorization_code');
+      params.append('code', args.code);
+      params.append('redirect_uri', args.redirectUri);
+      params.append('client_id', env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID);
+      params.append('client_secret', env.SPOTIFY_CLIENT_SECRET);
+
       const tokenResponse = await axios.post(
         "https://accounts.spotify.com/api/token",
-        new URLSearchParams({
-          grant_type: "authorization_code",
-          code: args.code,
-          redirect_uri: args.redirectUri,
-          client_id: env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID,
-          client_secret: env.SPOTIFY_CLIENT_SECRET,
-        }),
+        params.toString(), // Convert to string explicitly
         {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
         },
       );
+
       const { access_token, refresh_token, expires_in } = tokenResponse.data;
 
-      const convexUser = await ctx.runQuery(api.queries.users.getMe);
+      // FIX: Look up user by Clerk ID instead of using getMe
+      const convexUser = await ctx.runQuery(api.queries.users.getUserByClerkId, {
+        clerkId: args.clerkUserId,
+      });
+      
       if (!convexUser) {
-        throw new Error("Convex user not found after Clerk authentication.");
+        throw new Error(`Convex user not found for Clerk ID: ${args.clerkUserId}`);
       }
 
       const encryptedAccessToken = await encrypt(access_token);
@@ -171,14 +235,15 @@ export const refreshAccessToken = internalAction({
     let tokenResponse;
 
     if (account.platform === "spotify") {
+      const params = new URLSearchParams();
+      params.append('grant_type', 'refresh_token');
+      params.append('refresh_token', decryptedRefreshToken);
+      params.append('client_id', env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID);
+      params.append('client_secret', env.SPOTIFY_CLIENT_SECRET);
+
       tokenResponse = await axios.post(
         "https://accounts.spotify.com/api/token",
-        new URLSearchParams({
-          grant_type: "refresh_token",
-          refresh_token: decryptedRefreshToken,
-          client_id: env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID,
-          client_secret: env.SPOTIFY_CLIENT_SECRET,
-        }),
+        params.toString(),
         {
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
         },
@@ -604,11 +669,12 @@ export const _getAppSpotifyAccessToken = internalAction({
     }
 
     try {
+      const params = new URLSearchParams();
+      params.append('grant_type', 'client_credentials');
+
       const response = await axios.post(
         "https://accounts.spotify.com/api/token",
-        new URLSearchParams({
-          grant_type: "client_credentials",
-        }),
+        params.toString(),
         {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
