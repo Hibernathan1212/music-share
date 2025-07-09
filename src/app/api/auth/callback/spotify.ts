@@ -1,6 +1,6 @@
-// src/pages/api/auth/callback/spotify.ts
+// src/api/auth/callback/spotify.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { api } from "../../../../convex/_generated/api"; // Correct relative path
+import { api } from "../../../../../convex/_generated/api"; // Correct relative path
 import { getAuth } from "@clerk/nextjs/server"; // For getting Clerk user ID on server
 import { ConvexClient } from "convex/browser"; // Server-side Convex client
 import { env } from "~/env"; // Import your t3 env
