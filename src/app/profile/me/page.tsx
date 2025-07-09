@@ -1,4 +1,4 @@
-// src/app/profile/me/page.tsx - REVISED
+// src/app/profile/me/page.tsx - FIXED
 "use client";
 
 import { useMutation, useQuery } from "convex/react";
@@ -34,8 +34,6 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Id } from "../../../../convex/_generated/dataModel";
-import { Doc } from "../../../../convex/_generated/dataModel"; // Import Doc for user type
 
 const profileSchema = z.object({
   username: z
@@ -68,7 +66,6 @@ export default function MyProfilePage() {
   const {
     register,
     handleSubmit,
-    setValue,
     watch,
     setError,
     clearErrors,
@@ -86,7 +83,7 @@ export default function MyProfilePage() {
     },
   });
 
-  const convexUser = useQuery( // Removed generic type here, will let Convex infer
+  const convexUser = useQuery(
     api.queries.users.getMe,
     !isClerkLoaded || !isSignedIn ? "skip" : undefined,
   );
@@ -112,9 +109,9 @@ export default function MyProfilePage() {
       reset({
         // Use reset to set form values from fetched data, and mark form as not dirty
         username: convexUser.username ?? "",
-        displayName: convexUser.displayName || null, // Ensure null
-        bio: convexUser.bio || null, // Ensure null
-        profilePictureUrl: convexUser.profilePictureUrl || null, // Ensure null
+        displayName: convexUser.displayName ?? null, // Fixed: Use ?? instead of ||
+        bio: convexUser.bio ?? null, // Fixed: Use ?? instead of ||
+        profilePictureUrl: convexUser.profilePictureUrl ?? null, // Fixed: Use ?? instead of ||
       });
       setInitialLoadComplete(true);
 
@@ -184,10 +181,12 @@ export default function MyProfilePage() {
       } else {
         toast.error("User ID not found. Cannot save profile.");
       }
-    } catch (error: any) {
+    } catch (error) {
+      // Fixed: Remove any type annotation and handle properly
       console.error("Failed to update profile:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
       toast.error("Failed to update profile.", {
-        description: error.message ?? "An unexpected error occurred.",
+        description: errorMessage,
       });
     } finally {
       setIsSaving(false);
@@ -239,13 +238,13 @@ export default function MyProfilePage() {
     );
   }
 
-  // After the above `if (!convexUser)` block, `convexUser` is guaranteed to be `Doc<"users">`
+  // After the above `if (!convexUser)` block, `convexUser` is guaranteed to be defined
   const isSaveDisabled =
     isSaving ||
     !isDirty ||
     Object.keys(errors).length > 0 ||
     (watchUsername !== convexUser.username &&
-      checkUsernameAvailability === false); // No optional chaining needed on convexUser
+      checkUsernameAvailability === false);
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-background p-4 text-foreground">
@@ -287,7 +286,7 @@ export default function MyProfilePage() {
           <div className="flex flex-col items-center gap-4">
             <Avatar className="h-28 w-28 border-2 border-primary shadow-lg-soft">
               <AvatarImage
-                src={watch("profilePictureUrl") || clerkUser?.imageUrl || undefined}
+                src={watch("profilePictureUrl") ?? clerkUser?.imageUrl ?? undefined} // Fixed: Use ?? instead of ||
                 alt={watch("displayName") ?? watch("username") ?? "User Avatar"}
               />
               <AvatarFallback className="text-4xl">
@@ -425,9 +424,9 @@ export default function MyProfilePage() {
                     reset({
                       // Reset to current Convex user values
                       username: convexUser.username ?? "",
-                      displayName: convexUser.displayName || null,
-                      bio: convexUser.bio || null,
-                      profilePictureUrl: convexUser.profilePictureUrl || null,
+                      displayName: convexUser.displayName ?? null, // Fixed: Use ?? instead of ||
+                      bio: convexUser.bio ?? null, // Fixed: Use ?? instead of ||
+                      profilePictureUrl: convexUser.profilePictureUrl ?? null, // Fixed: Use ?? instead of ||
                     });
                     clearErrors();
                   }}

@@ -172,7 +172,7 @@ export default function SearchPage() {
               searchUsersResult && // Ensure it's not undefined
               searchUsersResult.length === 0 && ( // Length property now safe to access
                 <p className="text-center text-muted-foreground p-8">
-                  No users found for "{debouncedSearchTerm}".
+                  No users found for &quot{debouncedSearchTerm}&quot.
                 </p>
               )}
             {!isLoading &&
@@ -182,21 +182,19 @@ export default function SearchPage() {
               (searchMusicResult.songs.length === 0 &&
                 searchMusicResult.artists.length === 0) && (
                 <p className="text-center text-muted-foreground p-8">
-                  No music found for "{debouncedSearchTerm}".
+                  No music found for &quot{debouncedSearchTerm}&quot.
                 </p>
               )}
 
             {/* Display Search Results */}
             <div className="space-y-3">
-              {searchType === "users" &&
-                searchUsersResult && // Ensure it's not undefined
-                searchUsersResult.map((user: Doc<"users">) => (
+              {searchType === "users" && searchUsersResult?.map((user: Doc<"users">) => (
                   // Type here
                   <Link href={`/profile/${user.username}`} key={user._id}>
                     <div className="flex cursor-pointer items-center space-x-4 rounded-md p-3 transition-colors hover:bg-accent hover:shadow-soft">
                       <Avatar className="h-14 w-14">
                         <AvatarImage
-                          src={user.profilePictureUrl || undefined}
+                          src={user.profilePictureUrl ?? undefined}
                           alt={user.displayName ?? user.username ?? "User Avatar"}
                         />
                         <AvatarFallback>
@@ -207,7 +205,7 @@ export default function SearchPage() {
                       </Avatar>
                       <div>
                         <p className="font-semibold text-foreground">
-                          {user.displayName || user.username}
+                          {user.displayName ?? user.username}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           @{user.username}

@@ -2,20 +2,34 @@
 "use client";
 
 import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../../convex/_generated/api"; // Adjust path for api.users, api.music, api.friends
-// ... (other imports)
+import { api } from "../../../../convex/_generated/api";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
-// import { Id } from "../../../../convex/_generated/dataModel"; // Import Id type
-import { formatDistanceToNow } from "date-fns"; // Make sure to import this
+import { Id } from "../../../../convex/_generated/dataModel";
+import { formatDistanceToNow } from "date-fns";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { useUser } from "@clerk/nextjs";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 import { Music, Link, Loader2, ArrowLeft, UserRoundCheck, UserPlus, BookOpenText, Clock, Headphones } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
+
+// Define proper TypeScript interfaces
+interface Song {
+  _id: Id<"songs">;
+  title: string;
+  artist: string;
+  album: string;
+  coverImageUrl?: string | null;
+}
+
+interface RecentlyListenedEntry {
+  _id: Id<"userListeningHistory">;
+  song: Song | null;
+  listenedAt: number;
+}
 
 interface SongDisplayProps {
   song: {
@@ -25,6 +39,18 @@ interface SongDisplayProps {
     coverImageUrl?: string | null;
   };
   listenedAt: number;
+}
+
+interface User {
+  _id: Id<"users">;
+  username: string;
+  displayName?: string | null;
+  profilePictureUrl?: string | null;
+  bio?: string | null;
+}
+
+interface FriendStatus {
+  isFollowing: boolean;
 }
 
 const SongDisplay: React.FC<SongDisplayProps> = ({ song, listenedAt }) => {
@@ -60,38 +86,35 @@ const SongDisplay: React.FC<SongDisplayProps> = ({ song, listenedAt }) => {
 export default function PublicProfilePage() {
   const router = useRouter();
   const pathname = usePathname();
-  const usernameFromUrl = pathname.split("/").pop(); // Get the username from the URL
+  const usernameFromUrl = pathname.split("/").pop();
 
   const { user: clerkUser, isLoaded: isClerkLoaded, isSignedIn } = useUser();
   const currentUserConvex = useQuery(
-    api.queries.users.getMe, // Query for the current logged-in user's Convex doc
+    api.queries.users.getMe,
     !isClerkLoaded || !isSignedIn ? "skip" : undefined,
-  );
-  // Query the profile data for the user being viewed
+  ) as User | null | undefined;
+
   const viewedUser = useQuery(
-    api.queries.users.getUserByUsername, // Use the new getUserByUsername query
+    api.queries.users.getUserByUsername,
     usernameFromUrl ? { username: usernameFromUrl } : "skip",
-  );
+  ) as User | null | undefined;
 
   const recentlyListened = useQuery(
-    api.queries.music.getUserRecentlyListened, // Use the new getUserRecentlyListened query
+    api.queries.music.getUserRecentlyListened,
     viewedUser?._id ? { userId: viewedUser._id, limit: 10 } : "skip",
-  );
+  ) as RecentlyListenedEntry[] | undefined;
 
-  const followUser = useMutation(api.queries.friends.followUser); // Use the new friends mutation
-  const unfollowUser = useMutation(api.queries.friends.unfollowUser); // Use the new friends mutation
+  const followUser = useMutation(api.queries.friends.followUser);
+  const unfollowUser = useMutation(api.queries.friends.unfollowUser);
   const friendStatus = useQuery(
-    api.queries.friends.getFriendStatus, // New query to check friendship status
+    api.queries.friends.getFriendStatus,
     currentUserConvex && viewedUser ? { targetUserId: viewedUser._id } : "skip"
-  );
-
+  ) as FriendStatus | undefined;
 
   const [isFollowActionLoading, setIsFollowActionLoading] = useState(false);
 
-  // Determine if the current logged-in user is following the viewed user
   const isFollowing = friendStatus?.isFollowing;
 
-  // If viewing own profile, redirect to /profile/me
   useEffect(() => {
     if (
       isClerkLoaded &&
@@ -116,17 +139,16 @@ export default function PublicProfilePage() {
         await followUser({ followingId: viewedUser._id });
         toast.success(`Now following @${viewedUser.username}.`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to toggle follow status:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
       toast.error("Failed to update follow status.", {
-        description: error.message ?? "An unexpected error occurred.",
+        description: errorMessage,
       });
     } finally {
       setIsFollowActionLoading(false);
     }
   };
-
-  // ... (loading states as before, ensure they correctly use viewedUser, currentUserConvex and friendStatus)
 
   if (!isClerkLoaded || !isSignedIn) {
     return (
@@ -208,7 +230,6 @@ export default function PublicProfilePage() {
     );
   }
 
-
   return (
     <div className="flex min-h-screen flex-col items-center bg-background p-4 text-foreground">
       <Card className="container mx-auto mt-8 w-full max-w-2xl p-6 shadow-lg-soft">
@@ -225,7 +246,7 @@ export default function PublicProfilePage() {
           <CardTitle className="text-3xl font-bold text-primary">
             {viewedUser.displayName ?? viewedUser.username}&apos;s Profile
           </CardTitle>
-          <div className="w-[88px]" /> {/* Spacer */}
+          <div className="w-[88px]" />
         </CardHeader>
 
         <CardContent className="space-y-8 p-0 pt-6">
@@ -247,7 +268,6 @@ export default function PublicProfilePage() {
             <p className="text-xl text-muted-foreground">
               @{viewedUser.username}
             </p>
-            {/* Only show follow button if not viewing own profile AND logged in */}
             {currentUserConvex && currentUserConvex._id !== viewedUser._id && (
               <Button
                 variant={isFollowing ? "outline" : "default"}
@@ -290,7 +310,7 @@ export default function PublicProfilePage() {
                     <Clock className="h-5 w-5 text-primary" /> Recently Listened
                   </h2>
                   <div className="space-y-3">
-                    {recentlyListened.map((entry: any) => (
+                    {recentlyListened.map((entry: RecentlyListenedEntry) => (
                       <SongDisplay
                         key={String(entry._id)}
                         song={{
@@ -308,8 +328,8 @@ export default function PublicProfilePage() {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center gap-4 py-8 text-center text-muted-foreground">
-                <Headphones className="h-12 w-12" />
-                <p className="text-lg">This user hasn't added a bio or listened to anything recently.</p>
+              <Headphones className="h-12 w-12" />
+              <p className="text-lg">This user hasn&apos;t added a bio or listened to anything recently.</p>
             </div>
           )}
         </CardContent>

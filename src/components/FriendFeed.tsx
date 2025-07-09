@@ -45,11 +45,11 @@ const SongDisplay: React.FC<SongDisplayProps> = ({
       {/* Added hover shadow */}
       <Avatar className="h-12 w-12 flex-shrink-0">
         <AvatarImage
-          src={listeningUser.profilePictureUrl || undefined}
-          alt={listeningUser.displayName || listeningUser.username}
+          src={listeningUser.profilePictureUrl ?? undefined}
+          alt={listeningUser.displayName ?? listeningUser.username}
         />
         <AvatarFallback>
-          {(listeningUser.displayName || listeningUser.username)
+          {(listeningUser.displayName ?? listeningUser.username)
             .charAt(0)
             .toUpperCase()}
         </AvatarFallback>
@@ -70,7 +70,7 @@ const SongDisplay: React.FC<SongDisplayProps> = ({
       <div className="flex-1 overflow-hidden">
         <p className="line-clamp-1 text-sm font-medium text-muted-foreground">
           <span className="font-semibold text-foreground">
-            {listeningUser.displayName || listeningUser.username}
+            {listeningUser.displayName ?? listeningUser.username}
           </span>{" "}
           listened to:
         </p>
@@ -106,7 +106,7 @@ export function FriendFeed() {
     // Show loading state until all data is ready
     return (
       <div className="space-y-4">
-        {[...Array(5)].map((_, i) => (
+        {Array.from({ length: 5 }, (_, i) => (
           <Skeleton key={i} className="h-20 w-full rounded-lg" />
         ))}
       </div>

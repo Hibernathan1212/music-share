@@ -96,7 +96,7 @@ export default async function HomePage() {
           <Suspense
             fallback={
               <div className="space-y-4">
-                {[...Array(5)].map((_, i) => (
+                {Array.from({ length: 5 }, (_, i) => (
                   <Skeleton key={i} className="h-20 w-full rounded-lg" />
                 ))}
               </div>

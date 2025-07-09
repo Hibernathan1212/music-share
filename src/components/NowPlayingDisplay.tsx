@@ -1,7 +1,7 @@
 // src/components/NowPlayingDisplay.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAction, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
@@ -10,24 +10,33 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { Clock, Music, Headphones, AlertCircle, RefreshCcw, Pause, Play } from "lucide-react";
 import ClipLoader from "react-spinners/ClipLoader";
 import Link from "next/link";
-import { toast } from "sonner"; // For nice notifications
+import Image from "next/image";
+import { toast } from "sonner";
+
+interface CurrentPlaying {
+  title: string;
+  artistName: string;
+  albumCover?: string;
+  isPlaying: boolean;
+  progress_ms?: number;
+  duration_ms?: number;
+}
 
 export function NowPlayingDisplay() {
-  const { user, isLoaded: isClerkLoaded, isSignedIn } = useUser();
+  const { isLoaded: isClerkLoaded, isSignedIn } = useUser();
   const convexUser = useQuery(api.queries.users.getMe, !isClerkLoaded || !isSignedIn ? "skip" : undefined);
 
   const fetchCurrentPlaying = useAction(
     api.queries.api_integrations.fetchSpotifyCurrentlyPlaying,
   );
 
-  const [currentPlaying, setCurrentPlaying] = useState<any | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // Initial loading state
+  const [currentPlaying, setCurrentPlaying] = useState<CurrentPlaying | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isPolling, setIsPolling] = useState(false); // To show polling indicator
+  const [isPolling, setIsPolling] = useState(false);
 
-  const refreshNowPlaying = async () => {
+  const refreshNowPlaying = useCallback(async () => {
     if (!isClerkLoaded || !isSignedIn || !convexUser) {
-      // If user is not ready, don't attempt to fetch
       setError("Please sign in and ensure your profile is loaded.");
       setIsLoading(false);
       return;
@@ -36,7 +45,6 @@ export function NowPlayingDisplay() {
     setIsPolling(true);
     setError(null);
     try {
-      // Call the action to fetch from Spotify API
       const data = await fetchCurrentPlaying({ userId: convexUser._id });
       setCurrentPlaying(data);
       if (!data) {
@@ -44,10 +52,9 @@ export function NowPlayingDisplay() {
           description: "Start listening to see your status here.",
         });
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Failed to fetch current playing:", err);
-      const errorMessage =
-        err.message ?? "Failed to fetch currently playing music.";
+      const errorMessage = err instanceof Error ? err.message : "Failed to fetch currently playing music.";
       setError(errorMessage);
       setCurrentPlaying(null);
       toast.error("Failed to fetch Spotify status", {
@@ -59,36 +66,32 @@ export function NowPlayingDisplay() {
       setIsPolling(false);
       setIsLoading(false);
     }
-  };
+  }, [isClerkLoaded, isSignedIn, convexUser, fetchCurrentPlaying]);
 
   useEffect(() => {
-    // Only run if Clerk and Convex user are loaded
     if (isClerkLoaded && isSignedIn && convexUser) {
-      refreshNowPlaying(); // Initial fetch
-
-      // Polling every 10 seconds
-      const intervalId = setInterval(refreshNowPlaying, 10000); // Poll every 10 seconds
-
-      return () => clearInterval(intervalId); // Cleanup on unmount
+      void refreshNowPlaying();
+      const intervalId = setInterval(() => {
+        void refreshNowPlaying();
+      }, 10000);
+      return () => clearInterval(intervalId);
     } else if (isClerkLoaded && !isSignedIn) {
-      // If Clerk is loaded but user is not signed in
       setIsLoading(false);
       setError("Please sign in to see your status.");
     }
-  }, [isClerkLoaded, isSignedIn, convexUser, fetchCurrentPlaying]); // Dependencies for useEffect
+  }, [isClerkLoaded, isSignedIn, convexUser, refreshNowPlaying]);
 
   if (isLoading) {
-    return <Skeleton className="h-48 w-full rounded-md" />; // Larger skeleton for better visual
+    return <Skeleton className="h-48 w-full rounded-md" />;
   }
 
-  // Refined conditional rendering for error/no account linked
-  if (error && error.includes("Spotify account not linked")) {
+  if (error?.includes("Spotify account not linked")) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 rounded-md border border-destructive/30 bg-destructive/10 p-6 text-center">
         <AlertCircle className="h-10 w-10 text-destructive" />
         <p className="text-lg font-medium text-destructive">Spotify not connected.</p>
         <p className="text-sm text-muted-foreground">
-          To see what you're listening to, please link your Spotify account.
+          To see what you&apos;re listening to, please link your Spotify account.
         </p>
         <Link href="/settings">
           <Button>Connect Spotify</Button>
@@ -103,7 +106,7 @@ export function NowPlayingDisplay() {
         <AlertCircle className="h-10 w-10 text-destructive" />
         <p className="text-lg font-medium text-destructive">Error Loading Status</p>
         <p className="text-sm text-muted-foreground">{error}</p>
-        <Button onClick={refreshNowPlaying} variant="outline">
+        <Button onClick={() => void refreshNowPlaying()} variant="outline">
           <RefreshCcw className="mr-2 h-4 w-4" /> Try Again
         </Button>
       </div>
@@ -124,28 +127,28 @@ export function NowPlayingDisplay() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={refreshNowPlaying}
+          onClick={() => void refreshNowPlaying()}
           disabled={isPolling}
           className="rounded px-2 py-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <RefreshCcw
             className={`mr-1 h-3 w-3 ${isPolling ? "animate-spin" : ""}`}
-          />{" "}
+          />
           Refresh
         </Button>
       </div>
       {currentPlaying ? (
         <div className="flex items-center gap-4">
           {currentPlaying.albumCover ? (
-            <img
+            <Image
               src={currentPlaying.albumCover}
-              alt={`${currentPlaying.albumName} album cover`}
-              className="h-24 w-24 rounded-md object-cover shadow-soft" // Added shadow
+              alt={`album cover`}
+              width={96}
+              height={96}
+              className="rounded-md object-cover shadow-soft"
             />
           ) : (
             <div className="flex h-24 w-24 items-center justify-center rounded-md bg-secondary text-muted-foreground shadow-inset-soft">
-              {" "}
-              {/* Added shadow */}
               <Music className="h-12 w-12" />
             </div>
           )}
@@ -156,15 +159,15 @@ export function NowPlayingDisplay() {
             <p className="line-clamp-1 text-md text-muted-foreground">
               by {currentPlaying.artistName}
             </p>
-            <p className="line-clamp-1 text-sm text-muted-foreground">
+            {/* <p className="line-clamp-1 text-sm text-muted-foreground">
               on {currentPlaying.albumName}
-            </p>
+            </p> */}
             <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
               {currentPlaying.isPlaying ? (
                 <Play className="h-4 w-4 text-primary" />
               ) : (
                 <Pause className="h-4 w-4 text-muted-foreground" />
-              )}{" "}
+              )}
               {typeof currentPlaying.progress_ms === "number" &&
               typeof currentPlaying.duration_ms === "number" ? (
                 <>
