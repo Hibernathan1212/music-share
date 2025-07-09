@@ -43,14 +43,14 @@ export const searchMusic = query({
         let artistName = "Unknown Artist";
         if (song.artistId) {
           const artist = await ctx.db.get(song.artistId);
-          artistName = artist?.name || artistName;
+          artistName = artist?.name ?? artistName;
         }
         let albumTitle = "Unknown Album";
         let coverImageUrl = null;
         if (song.albumId) {
           const album = await ctx.db.get(song.albumId);
-          albumTitle = album?.title || albumTitle;
-          coverImageUrl = album?.coverImageUrl || null;
+          albumTitle = album?.title ?? albumTitle;
+          coverImageUrl = album?.coverImageUrl ?? null;
         }
         return {
           _id: song._id,

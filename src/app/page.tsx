@@ -31,7 +31,7 @@ export default async function LandingPage() {
         </h1>
         <p className="max-w-prose text-lg text-muted-foreground sm:text-xl leading-relaxed">
           Connect with friends, discover new music, and share your listening
-          journey in real-time. See what&apos;s playing, or what they've listened to
+          journey in real-time. See what&apos;s playing, or what they&apos;ve listened to
           recently.
         </p>
         <div className="flex flex-col gap-4 sm:flex-row">
