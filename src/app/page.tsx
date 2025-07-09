@@ -17,7 +17,7 @@ export default async function LandingPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-8 text-center text-foreground">
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-8 py-16">
-        <div className="relative h-28 w-28 sm:h-36 sm:w-36">
+        {/* <div className="relative h-28 w-28 sm:h-36 sm:w-36">
           <Image
             src="/musishare-logo.svg" // Make sure you have this in your public folder
             alt="Musishare Logo"
@@ -25,7 +25,7 @@ export default async function LandingPage() {
             objectFit="contain"
             className="drop-shadow-lg"
           />
-        </div>
+        </div> */}
         <h1 className="text-5xl font-extrabold tracking-tight text-primary sm:text-6xl lg:text-7xl">
           Musishare
         </h1>
