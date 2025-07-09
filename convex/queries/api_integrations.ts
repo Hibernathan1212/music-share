@@ -640,7 +640,7 @@ export const fetchAndStoreMusicMetadata = internalAction({
           artistId: primaryArtistId, // Now correctly can be undefined
           albumId: albumId,
           durationMs: data.duration_ms,
-          previewUrl: data.preview_url,
+          previewUrl: data.preview_url ?? undefined,
         });
       }
       console.log(
@@ -658,6 +658,7 @@ export const fetchAndStoreMusicMetadata = internalAction({
   },
 });
 
+
 export const _getAppSpotifyAccessToken = internalAction({
   args: {},
   handler: async (ctx) => {
@@ -672,13 +673,20 @@ export const _getAppSpotifyAccessToken = internalAction({
       const params = new URLSearchParams();
       params.append('grant_type', 'client_credentials');
 
+      // Fix: Replace Buffer with Web API compatible base64 encoding
+      const credentials = `${clientId}:${clientSecret}`;
+      const encoder = new TextEncoder();
+      const data = encoder.encode(credentials);
+      const binaryString = String.fromCharCode(...data);
+      const base64Credentials = btoa(binaryString);
+
       const response = await axios.post(
         "https://accounts.spotify.com/api/token",
         params.toString(),
         {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
+            Authorization: `Basic ${base64Credentials}`,
           },
         },
       );

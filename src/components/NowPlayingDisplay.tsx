@@ -35,8 +35,11 @@ export function NowPlayingDisplay() {
   const [error, setError] = useState<string | null>(null);
   const [isPolling, setIsPolling] = useState(false);
 
+  const isReady = isClerkLoaded && isSignedIn && !!convexUser;
+  const stableUserId = convexUser?._id;
+
   const refreshNowPlaying = useCallback(async () => {
-    if (!isClerkLoaded || !isSignedIn || !convexUser) {
+    if (!isClerkLoaded || !isSignedIn || !stableUserId) {
       setError("Please sign in and ensure your profile is loaded.");
       setIsLoading(false);
       return;
@@ -45,7 +48,7 @@ export function NowPlayingDisplay() {
     setIsPolling(true);
     setError(null);
     try {
-      const data = await fetchCurrentPlaying({ userId: convexUser._id });
+      const data = await fetchCurrentPlaying({ userId: stableUserId });
       setCurrentPlaying(data);
       if (!data) {
         toast.info("No music currently playing on Spotify.", {
@@ -66,20 +69,18 @@ export function NowPlayingDisplay() {
       setIsPolling(false);
       setIsLoading(false);
     }
-  }, [isClerkLoaded, isSignedIn, convexUser, fetchCurrentPlaying]);
+  }, [isClerkLoaded, isSignedIn, stableUserId, fetchCurrentPlaying]);
 
   useEffect(() => {
-    if (isClerkLoaded && isSignedIn && convexUser) {
+    if (!isReady) return;
+
+    void refreshNowPlaying();
+    const intervalId = setInterval(() => {
       void refreshNowPlaying();
-      const intervalId = setInterval(() => {
-        void refreshNowPlaying();
-      }, 10000);
-      return () => clearInterval(intervalId);
-    } else if (isClerkLoaded && !isSignedIn) {
-      setIsLoading(false);
-      setError("Please sign in to see your status.");
-    }
-  }, [isClerkLoaded, isSignedIn, convexUser, refreshNowPlaying]);
+    }, 10000);
+
+    return () => clearInterval(intervalId);
+  }, [isReady, refreshNowPlaying]);
 
   if (isLoading) {
     return <Skeleton className="h-48 w-full rounded-md" />;
