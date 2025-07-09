@@ -73,12 +73,15 @@ export default function SearchPage() {
       : "skip",
   );
 
-  const searchMusicResult = useQuery( // Removed generic type here
-    api.queries.search.searchMusic,
-    isLoaded && isSignedIn && debouncedSearchTerm.length > 2 && searchType === "music"
-      ? { query: debouncedSearchTerm }
-      : "skip",
-  );
+  const searchMusicResult = useQuery(
+  api.queries.search.searchMusic,
+  isLoaded &&
+    isSignedIn &&
+    debouncedSearchTerm.length > 2 &&
+    searchType === "music"
+    ? { query: debouncedSearchTerm }
+    : "skip",
+) as MusicSearchResults | undefined;
 
   if (!isLoaded || !isSignedIn) {
     return (

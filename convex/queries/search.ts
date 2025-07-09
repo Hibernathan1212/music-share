@@ -1,4 +1,3 @@
-// convex/search.ts - REVISED
 import { query } from "../_generated/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
@@ -29,8 +28,14 @@ export const searchMusic = query({
     if (args.query.length < 3) return [];
 
     // Search for songs by title and artists by name
-    const songs = await ctx.db.query("songs").withSearchIndex("search_title", (q) => q.search("title", args.query)).take(10); // Limit results
-    const artists = await ctx.db.query("artists").withSearchIndex("search_name", (q) => q.search("name", args.query)).take(10); // Limit results
+    const songs = await ctx.db
+      .query("songs")
+      .withSearchIndex("search_title", (q) => q.search("title", args.query))
+      .take(10); // Limit results
+    const artists = await ctx.db
+      .query("artists")
+      .withSearchIndex("search_name", (q) => q.search("name", args.query))
+      .take(10); // Limit results
 
     // Hydrate song results with artist and album details for display
     const hydratedSongs = await Promise.all(

@@ -259,7 +259,7 @@ export default function FriendsPage() {
                     // `user` is UserDoc here
                     <UserListItem
                       key={user!._id}
-                      user={user}
+                      user={user!}
                       isFollowing={true}
                       onFollowToggle={handleFollowToggle}
                       isActionLoading={actionLoadingId === user!._id}
@@ -283,7 +283,7 @@ export default function FriendsPage() {
                     // `user` is UserDoc here
                     <UserListItem
                       key={user!._id}
-                      user={user}
+                      user={user!}
                       isFollowing={followedUserIds.has(String(user!._id))}
                       onFollowToggle={handleFollowToggle}
                       isActionLoading={actionLoadingId === user!._id}
