@@ -9,8 +9,6 @@ export const searchUsers = query({
 
     const lowerCaseQuery = args.query.toLowerCase();
 
-    // Use a full-text search index if you have one on 'username' or 'displayName'.
-    // Otherwise, filter client-side (less scalable for large dbs):
     const users = await ctx.db.query("users").collect();
     return users.filter(
       (user) =>
@@ -22,22 +20,20 @@ export const searchUsers = query({
 
 export const searchMusic = query({
   args: {
-    query: v.string(), // Search term
+    query: v.string(), 
   },
   handler: async (ctx, args) => {
     if (args.query.length < 3) return [];
 
-    // Search for songs by title and artists by name
     const songs = await ctx.db
       .query("songs")
       .withSearchIndex("search_title", (q) => q.search("title", args.query))
-      .take(10); // Limit results
+      .take(10); 
     const artists = await ctx.db
       .query("artists")
       .withSearchIndex("search_name", (q) => q.search("name", args.query))
-      .take(10); // Limit results
+      .take(10); 
 
-    // Hydrate song results with artist and album details for display
     const hydratedSongs = await Promise.all(
       songs.map(async (song) => {
         let artistName = "Unknown Artist";
@@ -64,7 +60,6 @@ export const searchMusic = query({
       }),
     );
 
-    // Prepare artist results for consistent display
     const formattedArtists = artists.map((artist) => ({
       _id: artist._id,
       type: "artist",
@@ -73,7 +68,6 @@ export const searchMusic = query({
       spotifyId: artist.spotifyId,
     }));
 
-    // Combine and return results (you might want to interleave or prioritize)
     return { songs: hydratedSongs, artists: formattedArtists };
   },
 });

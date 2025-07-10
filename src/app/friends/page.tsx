@@ -1,8 +1,7 @@
-// src/app/friends/page.tsx - REVISED
 "use client";
 
 import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api"; // Correct path to _generated/api
+import { api } from "../../../convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
@@ -25,11 +24,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { toast } from "sonner";
 import { useState } from "react";
-import { Id } from "../../../convex/_generated/dataModel"; // Import Id for Convex IDs
-import { Doc } from "../../../convex/_generated/dataModel"; // Import Doc for full document types
+import { Id } from "../../../convex/_generated/dataModel"; 
+import { Doc } from "../../../convex/_generated/dataModel"; 
 
-// Define the expected user type for the UserListItem component
-type UserDoc = Doc<"users">; // Full user document type from Convex
+type UserDoc = Doc<"users">; 
 
 interface UserListItemProps {
   user: UserDoc;
@@ -123,7 +121,7 @@ export default function FriendsPage() {
     targetUserId: Id<"users">,
     currentStatus: boolean,
   ) => {
-    if (!convexUser) return; // Should not happen if button is disabled, but good guard
+    if (!convexUser) return; 
 
     setActionLoadingId(targetUserId);
     try {
@@ -131,8 +129,8 @@ export default function FriendsPage() {
         await unfollowUser({ followingId: targetUserId });
         toast.success(
           `Unfollowed @${
-            (following ?? []).find((f) => f?._id === targetUserId)?.username ?? // Added (following ?? []) and null check for 'f'
-            (followers ?? []).find((f) => f?._id === targetUserId)?.username ?? // Added (followers ?? []) and null check for 'f'
+            (following ?? []).find((f) => f?._id === targetUserId)?.username ?? 
+            (followers ?? []).find((f) => f?._id === targetUserId)?.username ??
             "user"
           }.`,
         );
@@ -140,8 +138,8 @@ export default function FriendsPage() {
         await followUser({ followingId: targetUserId });
         toast.success(
           `Now following @${
-            (following ?? []).find((f) => f?._id === targetUserId)?.username ?? // Added (following ?? []) and null check for 'f'
-            (followers ?? []).find((f) => f?._id === targetUserId)?.username ?? // Added (followers ?? []) and null check for 'f'
+            (following ?? []).find((f) => f?._id === targetUserId)?.username ?? 
+            (followers ?? []).find((f) => f?._id === targetUserId)?.username ?? 
             "user"
           }.`,
         );
@@ -192,7 +190,6 @@ export default function FriendsPage() {
     );
   }
 
-  // Check if following or followers data is undefined (still loading)
   if (following === undefined || followers === undefined) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
@@ -205,7 +202,6 @@ export default function FriendsPage() {
     );
   }
 
-  // Now, `following` and `followers` are guaranteed to be `UserDoc[]`
   const followedUserIds = new Set(following.map((user) => String(user!._id)));
 
   return (
@@ -224,7 +220,7 @@ export default function FriendsPage() {
           <CardTitle className="text-3xl font-bold text-primary">
             Friends
           </CardTitle>
-          <div className="w-[88px]" /> {/* Spacer */}
+          <div className="w-[88px]" /> 
         </CardHeader>
 
         <CardContent className="p-0 pt-6">
@@ -232,11 +228,9 @@ export default function FriendsPage() {
             <TabsList className="grid w-full grid-cols-2 shadow-soft">
               <TabsTrigger value="following" className="shadow-inset-soft">
                 Following ({following.length ?? 0}){" "}
-                {/* `following` is UserDoc[] here */}
               </TabsTrigger>
               <TabsTrigger value="followers" className="shadow-inset-soft">
                 Followers ({followers.length ?? 0}){" "}
-                {/* `followers` is UserDoc[] here */}
               </TabsTrigger>
             </TabsList>
             <TabsContent
@@ -256,7 +250,6 @@ export default function FriendsPage() {
               ) : (
                 <div className="space-y-3">
                   {following.map((user) => (
-                    // `user` is UserDoc here
                     <UserListItem
                       key={user!._id}
                       user={user!}
@@ -280,7 +273,6 @@ export default function FriendsPage() {
               ) : (
                 <div className="space-y-3">
                   {followers.map((user) => (
-                    // `user` is UserDoc here
                     <UserListItem
                       key={user!._id}
                       user={user!}

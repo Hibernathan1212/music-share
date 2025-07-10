@@ -1,12 +1,9 @@
-
-// convex/friends.ts
 import { mutation, query } from "../_generated/server";
 import { v } from "convex/values";
-import { api } from "../_generated/api"; // Ensure api import for auth
 
 export const getFollowing = query({
   args: {
-    userId: v.id("users"), // Correctly typed
+    userId: v.id("users"), 
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -15,7 +12,6 @@ export const getFollowing = query({
       .withIndex("by_clerkId", (q) => q.eq("clerkId", identity!.subject))
       .unique();
 
-    // Auth check: User can only see their own following list (or add broader logic)
     if (!identity || !currentUser || String(currentUser._id) !== String(args.userId)) {
       throw new Error("Not authorized.");
     }
@@ -23,23 +19,21 @@ export const getFollowing = query({
     const followingRelations = await ctx.db
       .query("friendships")
       .withIndex("by_follower", (q) => q.eq("followerId", args.userId))
-      .collect(); // Use collect() for all results
+      .collect(); 
 
-    // Hydrate with user details
     const followingUsers = await Promise.all(
       followingRelations.map(async (relation) => {
         const user = await ctx.db.get(relation.followingId);
-        return user; // Return the full user object
+        return user; 
       }),
     );
-    // Filter out any nulls if users were deleted
     return followingUsers.filter(Boolean);
   },
 });
 
 export const getFollowers = query({
   args: {
-    userId: v.id("users"), // Correctly typed
+    userId: v.id("users"),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -48,7 +42,6 @@ export const getFollowers = query({
       .withIndex("by_clerkId", (q) => q.eq("clerkId", identity!.subject))
       .unique();
 
-    // Auth check
     if (!identity || !currentUser || String(currentUser._id) !== String(args.userId)) {
       throw new Error("Not authorized.");
     }
@@ -70,7 +63,7 @@ export const getFollowers = query({
 
 export const getFriendStatus = query({
   args: {
-    targetUserId: v.id("users"), // The user whose friendship status with current user we're checking
+    targetUserId: v.id("users"), 
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -79,7 +72,7 @@ export const getFriendStatus = query({
       .withIndex("by_clerkId", (q) => q.eq("clerkId", identity!.subject))
       .unique();
     if (!identity || !currentUser) {
-      return { isFollowing: false, isFollowedBy: false }; // Not authenticated
+      return { isFollowing: false, isFollowedBy: false };
     }
 
     const currentUserId = currentUser._id;
@@ -107,7 +100,7 @@ export const getFriendStatus = query({
 
 export const followUser = mutation({
   args: {
-    followingId: v.id("users"), // The user to follow
+    followingId: v.id("users"), 
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -146,7 +139,7 @@ export const followUser = mutation({
 
 export const unfollowUser = mutation({
   args: {
-    followingId: v.id("users"), // The user to unfollow
+    followingId: v.id("users"), 
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -173,6 +166,6 @@ export const unfollowUser = mutation({
     }
 
     await ctx.db.delete(existingFollow._id);
-    return true; // Indicate success
+    return true;
   },
 });

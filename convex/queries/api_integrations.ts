@@ -1,4 +1,3 @@
-// convex/queries/api_integrations.ts
 import { env } from "../../src/env";
 import {
   action,
@@ -11,7 +10,6 @@ import { v } from "convex/values";
 import axios from "axios";
 import { api, internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
-import type { Query } from "convex/server"; // Import Query for typing `q`
 
 const ENCRYPTION_KEY = env.ENCRYPTION_KEY;
 
@@ -90,7 +88,6 @@ export const handleSpotifyCallback = action({
   },
   handler: async (ctx, args) => {
     try {
-      // Create the request body as a properly formatted URLSearchParams
       const params = new URLSearchParams();
       params.append('grant_type', 'authorization_code');
       params.append('code', args.code);
@@ -100,7 +97,7 @@ export const handleSpotifyCallback = action({
 
       const tokenResponse = await axios.post(
         "https://accounts.spotify.com/api/token",
-        params.toString(), // Convert to string explicitly
+        params.toString(), 
         {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -110,7 +107,6 @@ export const handleSpotifyCallback = action({
 
       const { access_token, refresh_token, expires_in } = tokenResponse.data;
 
-      // FIX: Look up user by Clerk ID instead of using getMe
       const convexUser = await ctx.runQuery(api.queries.users.getUserByClerkId, {
         clerkId: args.clerkUserId,
       });
@@ -148,7 +144,7 @@ export const handleSpotifyCallback = action({
 export const storePlatformTokens = internalMutation({
   args: {
     userId: v.id("users"),
-    platform: v.union(v.literal("spotify"), v.literal("apple_music")),
+    platform: v.union(v.literal("spotify"), v.literal("appleMusic")),
     accessToken: v.string(),
     refreshToken: v.string(),
     expiresAt: v.number(),
@@ -182,7 +178,7 @@ export const storePlatformTokens = internalMutation({
 export const getPlatformAccount = query({
   args: {
     userId: v.id("users"),
-    platform: v.union(v.literal("spotify"), v.literal("apple_music")),
+    platform: v.union(v.literal("spotify"), v.literal("appleMusic")),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -285,7 +281,7 @@ export const _getPlatformAccountInternal = internalQuery({
     platformAccountId: v.optional(v.id("userPlatformAccounts")),
     userId: v.optional(v.id("users")),
     platform: v.optional(
-      v.union(v.literal("spotify"), v.literal("apple_music")),
+      v.union(v.literal("spotify"), v.literal("appleMusic")),
     ),
   },
   handler: async (ctx, args) => {
@@ -306,10 +302,9 @@ export const _getPlatformAccountInternal = internalQuery({
 export const pollAllCurrentlyPlaying = internalAction({
   args: {},
   handler: async (ctx) => {
-    // FIX: Changed api.queries.users.getAllUsers to query for users with spotifyUserId
     const users = await ctx.runQuery(
       api.queries.users.getAllUsers,
-    ); // Assuming you'll add this query
+    ); 
     for (const user of users) {
       if (user.spotifyUserId) {
         await ctx.runAction(
@@ -321,12 +316,10 @@ export const pollAllCurrentlyPlaying = internalAction({
   },
 });
 
-// THIS IS THE PUBLIC ACTION THE CLIENT WILL CALL
 export const fetchSpotifyCurrentlyPlaying = action({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    // FIX: Fetch by Convex ID, not Clerk ID.
     const currentUser = await ctx.runQuery(api.queries.users.getMe);
     if (!identity || !currentUser || String(currentUser._id) !== String(args.userId)) {
       throw new Error("Not authorized to fetch this user's playing status.");
@@ -395,7 +388,7 @@ export const fetchSpotifyCurrentlyPlaying = action({
         platform: "spotify",
         progress_ms: response.data.progress_ms,
         duration_ms: currentTrack.duration_ms,
-        isPlaying: isPlaying, // Pass isPlaying flag
+        isPlaying: isPlaying, 
       });
 
       return {
@@ -430,11 +423,10 @@ export const fetchSpotifyCurrentlyPlaying = action({
 export const pollCurrentlyPlayingForUser = internalAction({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
-    // Fix 1: Removed direct ctx.db.get here, call `getUserByConvexId` query instead (assuming you'll add this)
     const user = await ctx.runQuery(api.queries.users.getUserByConvexId, {
       userId: args.userId,
     });
-    if (!user) return; // If user not found (e.g., deleted), stop here.
+    if (!user) return; 
 
     const platformAccount = await ctx.runQuery(
       internal.queries.api_integrations._getPlatformAccountInternal,
@@ -495,7 +487,7 @@ export const pollCurrentlyPlayingForUser = internalAction({
           platform: "spotify",
           progress_ms: response.data.progress_ms,
           duration_ms: currentTrack.duration_ms,
-          isPlaying: isPlaying, // Pass isPlaying flag
+          isPlaying: isPlaying, 
         });
       } else {
         await ctx.runMutation(internal.queries.music.clearCurrentPlaying, {
@@ -574,7 +566,7 @@ export const fetchAndStoreMusicMetadata = internalAction({
               type: "artist",
             },
           );
-          // Fix 1: Use ctx.runQuery
+          
           const artistDoc = await ctx.runQuery(
             internal.queries.music._getArtistBySpotifyId,
             { spotifyId: albumArtistSpotifyId },
@@ -587,7 +579,7 @@ export const fetchAndStoreMusicMetadata = internalAction({
         await ctx.runMutation(internal.queries.music.storeAlbum, {
           spotifyId: data.id,
           title: data.name,
-          artistId: albumArtistId, // Now correctly can be undefined
+          artistId: albumArtistId, 
           releaseDate: data.release_date,
           coverImageUrl: data.images?.[0]?.url,
         });
@@ -603,7 +595,7 @@ export const fetchAndStoreMusicMetadata = internalAction({
               type: "artist",
             },
           );
-          // Fix 1: Use ctx.runQuery
+          
           const artistDoc = await ctx.runQuery(
             internal.queries.music._getArtistBySpotifyId,
             { spotifyId: primaryArtistSpotifyId },
@@ -624,7 +616,7 @@ export const fetchAndStoreMusicMetadata = internalAction({
               type: "album",
             },
           );
-          // Fix 1: Use ctx.runQuery
+          
           const albumDoc = await ctx.runQuery(
             internal.queries.music._getAlbumBySpotifyId,
             { spotifyId: songAlbumSpotifyId },
@@ -637,7 +629,7 @@ export const fetchAndStoreMusicMetadata = internalAction({
         await ctx.runMutation(internal.queries.music.storeSong, {
           spotifyId: data.id,
           title: data.name,
-          artistId: primaryArtistId, // Now correctly can be undefined
+          artistId: primaryArtistId, 
           albumId: albumId,
           durationMs: data.duration_ms,
           previewUrl: data.preview_url ?? undefined,
@@ -673,7 +665,6 @@ export const _getAppSpotifyAccessToken = internalAction({
       const params = new URLSearchParams();
       params.append('grant_type', 'client_credentials');
 
-      // Fix: Replace Buffer with Web API compatible base64 encoding
       const credentials = `${clientId}:${clientSecret}`;
       const encoder = new TextEncoder();
       const data = encoder.encode(credentials);

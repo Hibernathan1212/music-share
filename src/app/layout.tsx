@@ -1,10 +1,9 @@
-// src/app/layout.tsx
 import { type Metadata } from "next";
 import "~/styles/globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Geist } from "next/font/google";
-import ConvexClientProvider from "~/components/providers/ConvexClientProvider"; // Your Convex/Clerk Provider
-import { ThemeProvider } from "~/components/providers/theme-provider"; // Your ThemeProvider from next-themes
+import ConvexClientProvider from "~/components/providers/ConvexClientProvider"; 
+import { ThemeProvider } from "~/components/providers/theme-provider"; 
 import { Toaster } from "~/components/ui/sonner"; 
 
 export const metadata: Metadata = {
@@ -37,7 +36,7 @@ export default function RootLayout({
               {children}
             </ConvexClientProvider>
           </ClerkProvider>
-          <Toaster /> {/* Global toaster for notifications */}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

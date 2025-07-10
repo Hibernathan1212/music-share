@@ -1,4 +1,3 @@
-// src/app/settings/page.tsx
 "use client";
 
 import { useMutation, useQuery } from "convex/react";
@@ -35,7 +34,7 @@ export default function SettingsPage() {
   );
 
   const spotifyAccount = useQuery(
-    api.queries.api_integrations.getPlatformAccount, // Assuming this is in api_integrations.ts
+    api.queries.api_integrations.getPlatformAccount,
     isClerkLoaded && isSignedIn && convexUser ? { userId: convexUser._id, platform: "spotify" } : "skip",
   );
 
@@ -49,11 +48,10 @@ export default function SettingsPage() {
         env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI,
       );
       const scopes = encodeURIComponent(
-        "user-read-currently-playing user-read-recently-played user-read-playback-state", // Added user-read-playback-state for more control/info
+        "user-read-currently-playing user-read-recently-played user-read-playback-state", 
       );
-      // Generate a state parameter to prevent CSRF attacks
       const state = generateRandomString(16);
-      localStorage.setItem("spotify_auth_state", state); // Store state in localStorage
+      localStorage.setItem("spotify_auth_state", state); 
 
       const spotifyAuthUrl = `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&scope=${scopes}&redirect_uri=${redirectUri}&state=${state}`;
 

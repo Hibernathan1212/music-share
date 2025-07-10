@@ -16,7 +16,7 @@ http.route({
       return new Response("Error occured", { status: 400 });
     }
     switch (event.type) {
-      case "user.created": // intentional fallthrough
+      case "user.created": 
       case "user.updated":
         await ctx.runMutation(internal.queries.users.upsertFromClerk, {
           data: event.data,

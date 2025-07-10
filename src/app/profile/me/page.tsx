@@ -1,4 +1,3 @@
-// src/app/profile/me/page.tsx - FIXED
 "use client";
 
 import { useMutation, useQuery } from "convex/react";
@@ -104,14 +103,12 @@ export default function MyProfilePage() {
   const watchUsername = watch("username");
 
   useEffect(() => {
-    // Only run if convexUser is available and it's the initial load
     if (convexUser && !initialLoadComplete) {
       reset({
-        // Use reset to set form values from fetched data, and mark form as not dirty
         username: convexUser.username ?? "",
-        displayName: convexUser.displayName ?? null, // Fixed: Use ?? instead of ||
-        bio: convexUser.bio ?? null, // Fixed: Use ?? instead of ||
-        profilePictureUrl: convexUser.profilePictureUrl ?? null, // Fixed: Use ?? instead of ||
+        displayName: convexUser.displayName ?? null, 
+        bio: convexUser.bio ?? null, 
+        profilePictureUrl: convexUser.profilePictureUrl ?? null, 
       });
       setInitialLoadComplete(true);
 
@@ -172,9 +169,9 @@ export default function MyProfilePage() {
         await updateUserProfile({
           userId: convexUser._id,
           username: data.username,
-          displayName: data.displayName ?? undefined, // This now correctly matches `v.optional(v.string())`
-          bio: data.bio ?? undefined, // This now correctly matches `v.optional(v.string())`
-          profilePictureUrl: data.profilePictureUrl ?? undefined, // This now correctly matches `v.optional(v.string())`
+          displayName: data.displayName ?? undefined, 
+          bio: data.bio ?? undefined, 
+          profilePictureUrl: data.profilePictureUrl ?? undefined, 
         });
         toast.success("Profile updated successfully!");
         setIsEditing(false);
@@ -182,7 +179,6 @@ export default function MyProfilePage() {
         toast.error("User ID not found. Cannot save profile.");
       }
     } catch (error) {
-      // Fixed: Remove any type annotation and handle properly
       console.error("Failed to update profile:", error);
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
       toast.error("Failed to update profile.", {
@@ -224,7 +220,6 @@ export default function MyProfilePage() {
   }
 
   if (!convexUser) {
-    // If convexUser is null or undefined (loading)
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
         <div className="flex flex-col items-center gap-4">
@@ -238,7 +233,6 @@ export default function MyProfilePage() {
     );
   }
 
-  // After the above `if (!convexUser)` block, `convexUser` is guaranteed to be defined
   const isSaveDisabled =
     isSaving ||
     !isDirty ||
@@ -286,7 +280,7 @@ export default function MyProfilePage() {
           <div className="flex flex-col items-center gap-4">
             <Avatar className="h-28 w-28 border-2 border-primary shadow-lg-soft">
               <AvatarImage
-                src={watch("profilePictureUrl") ?? clerkUser?.imageUrl ?? undefined} // Fixed: Use ?? instead of ||
+                src={watch("profilePictureUrl") ?? clerkUser?.imageUrl ?? undefined} 
                 alt={watch("displayName") ?? watch("username") ?? "User Avatar"}
               />
               <AvatarFallback className="text-4xl">
@@ -422,11 +416,10 @@ export default function MyProfilePage() {
                   onClick={() => {
                     setIsEditing(false);
                     reset({
-                      // Reset to current Convex user values
                       username: convexUser.username ?? "",
-                      displayName: convexUser.displayName ?? null, // Fixed: Use ?? instead of ||
-                      bio: convexUser.bio ?? null, // Fixed: Use ?? instead of ||
-                      profilePictureUrl: convexUser.profilePictureUrl ?? null, // Fixed: Use ?? instead of ||
+                      displayName: convexUser.displayName ?? null, 
+                      bio: convexUser.bio ?? null, 
+                      profilePictureUrl: convexUser.profilePictureUrl ?? null, 
                     });
                     clearErrors();
                   }}

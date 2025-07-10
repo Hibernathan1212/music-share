@@ -1,4 +1,3 @@
-// src/app/home/page.tsx
 import { currentUser } from "@clerk/nextjs/server";
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
@@ -9,8 +8,7 @@ import ToggleTheme from "~/components/ToggleTheme";
 import { redirect } from "next/navigation";
 import { Home, Settings, Users, Search, Bell, User } from "lucide-react";
 import { Skeleton } from "~/components/ui/skeleton";
-import { Suspense } from "react"; // For loading states
-import Image from "next/image";
+import { Suspense } from "react"; 
 
 export default async function HomePage() {
   const user = await currentUser();
@@ -21,7 +19,6 @@ export default async function HomePage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
-      {/* Navbar/Header */}
       <nav className="sticky top-0 z-50 flex w-full items-center justify-between border-b border-border bg-card/80 px-4 py-3 shadow-lg-soft backdrop-blur-md md:px-8">
         <Link
           href="/home"
@@ -74,7 +71,7 @@ export default async function HomePage() {
                 <Settings className="mr-2 h-4 w-4" /> Settings
               </Button>
             </Link>
-            {/* Optional: Notifications button */}
+            {/* todo: notifications */}
             <Button
               variant="ghost"
               size="icon"
@@ -88,9 +85,7 @@ export default async function HomePage() {
         </div>
       </nav>
 
-      {/* Main Content */}
       <main className="container mx-auto flex w-full flex-1 flex-col gap-8 px-4 py-8 md:flex-row md:gap-12">
-        {/* Left Column: User's Now Playing */}
         <section className="sticky top-20 h-fit w-full rounded-lg border border-border bg-card p-6 shadow-lg-soft md:w-1/3">
           <h2 className="mb-5 text-2xl font-bold text-primary">Your Status</h2>
           <Suspense fallback={<Skeleton className="h-48 w-full rounded-md" />}>
@@ -98,7 +93,6 @@ export default async function HomePage() {
           </Suspense>
         </section>
 
-        {/* Right Column: Friend Feed */}
         <section className="w-full rounded-lg border border-border bg-card p-6 shadow-lg-soft md:w-2/3">
           <h2 className="mb-5 text-2xl font-bold text-primary">
             Friends&apos; Listening Stream
@@ -117,7 +111,6 @@ export default async function HomePage() {
         </section>
       </main>
 
-      {/* Mobile Bottom Navigation (Optional but Recommended for Social Apps) */}
       <nav className="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around border-t border-border bg-card px-4 py-3 shadow-xl-soft md:hidden">
         <Link href="/home" className="flex flex-col items-center text-primary">
           <Home className="h-5 w-5" />

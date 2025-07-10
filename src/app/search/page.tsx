@@ -1,4 +1,3 @@
-// src/app/search/page.tsx - REVISED
 "use client";
 
 import { useState, useEffect } from "react";
@@ -24,9 +23,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Doc, Id } from "../../../convex/_generated/dataModel"; // Import Doc and Id types
+import { Doc, Id } from "../../../convex/_generated/dataModel"; 
 
-// Define types for music search results to help TypeScript
 type SongSearchResult = {
   _id: Id<"songs">;
   type: "song";
@@ -66,7 +64,7 @@ export default function SearchPage() {
     };
   }, [searchTerm]);
 
-  const searchUsersResult = useQuery( // Removed generic type here
+  const searchUsersResult = useQuery( 
     api.queries.search.searchUsers,
     isLoaded && isSignedIn && debouncedSearchTerm.length > 2 && searchType === "users"
       ? { query: debouncedSearchTerm }
@@ -125,7 +123,7 @@ export default function SearchPage() {
           <CardTitle className="text-3xl font-bold text-primary">
             Search
           </CardTitle>
-          <div className="w-[88px]" /> {/* Spacer */}
+          <div className="w-[88px]" /> 
         </CardHeader>
 
         <CardContent className="space-y-6 p-0 pt-6">
@@ -169,8 +167,8 @@ export default function SearchPage() {
             {!isLoading &&
               debouncedSearchTerm.length > 2 &&
               searchType === "users" &&
-              searchUsersResult && // Ensure it's not undefined
-              searchUsersResult.length === 0 && ( // Length property now safe to access
+              searchUsersResult && 
+              searchUsersResult.length === 0 && (
                 <p className="text-center text-muted-foreground p-8">
                   No users found for &quot{debouncedSearchTerm}&quot.
                 </p>
@@ -178,7 +176,7 @@ export default function SearchPage() {
             {!isLoading &&
               debouncedSearchTerm.length > 2 &&
               searchType === "music" &&
-              searchMusicResult && // Ensure it's not undefined
+              searchMusicResult && 
               (searchMusicResult.songs.length === 0 &&
                 searchMusicResult.artists.length === 0) && (
                 <p className="text-center text-muted-foreground p-8">
@@ -186,10 +184,8 @@ export default function SearchPage() {
                 </p>
               )}
 
-            {/* Display Search Results */}
             <div className="space-y-3">
               {searchType === "users" && searchUsersResult?.map((user: Doc<"users">) => (
-                  // Type here
                   <Link href={`/profile/${user.username}`} key={user._id}>
                     <div className="flex cursor-pointer items-center space-x-4 rounded-md p-3 transition-colors hover:bg-accent hover:shadow-soft">
                       <Avatar className="h-14 w-14">
@@ -215,9 +211,9 @@ export default function SearchPage() {
                   </Link>
                 ))}
 
-              {searchType === "music" && searchMusicResult && ( // Ensure searchMusicResult is not undefined
+              {searchType === "music" && searchMusicResult && ( 
                 <>
-                  {searchMusicResult.songs.length > 0 && ( // Length property now safe to access
+                  {searchMusicResult.songs.length > 0 && ( 
                     <div className="space-y-3">
                       <h3 className="text-lg font-semibold text-primary">Songs</h3>
                       {searchMusicResult.songs.map((item: SongSearchResult) => (
@@ -249,7 +245,7 @@ export default function SearchPage() {
                     </div>
                   )}
 
-                  {searchMusicResult.artists.length > 0 && ( // Length property now safe to access
+                  {searchMusicResult.artists.length > 0 && ( 
                     <div className="space-y-3 mt-6">
                       <h3 className="text-lg font-semibold text-primary">
                         Artists

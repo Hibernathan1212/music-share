@@ -1,4 +1,3 @@
-// src/app/profile/[userId]/page.tsx
 "use client";
 
 import { useQuery, useMutation } from "convex/react";
@@ -16,7 +15,6 @@ import { Music, Link, Loader2, ArrowLeft, UserRoundCheck, UserPlus, BookOpenText
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 
-// Define proper TypeScript interfaces
 interface Song {
   _id: Id<"songs">;
   title: string;

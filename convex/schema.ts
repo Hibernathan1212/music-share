@@ -1,4 +1,3 @@
-// convex/schema.ts
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
@@ -14,7 +13,6 @@ export default defineSchema({
     spotifyUserId: v.optional(v.string()), // Spotify's user ID for this user (from their external profile)
     appleMusicUserId: v.optional(v.string()), // Apple Music's user ID for this user
 
-    // Denormalized fields for quick access to current listening status
     recentListen: v.optional(v.number()), // Unix timestamp of last song update
     currentSongId: v.optional(v.id("songs")), // Foreign key to the currently playing song
   })
@@ -25,8 +23,8 @@ export default defineSchema({
     followerId: v.id("users"), // person following (the one who initiated the follow)
     followingId: v.id("users"), // person followed (the one being followed)
   })
-    .index("by_follower", ["followerId"]) // Efficiently find who a user follows
-    .index("by_following", ["followingId"]) // Efficiently find a user's followers
+    .index("by_follower", ["followerId"]) // find who a user follows
+    .index("by_following", ["followingId"]) // find a user's followers
     .index("by_follower_following", ["followerId", "followingId"]), // Ensure unique relationship
 
   // --- Music Metadata (Cached from APIs) ---
@@ -46,7 +44,7 @@ export default defineSchema({
     spotifyId: v.optional(v.string()),
     appleMusicId: v.optional(v.string()),
     title: v.string(),
-    artistId: v.optional(v.id("artists")), // FIX: Make artistId optional in schema
+    artistId: v.optional(v.id("artists")), 
     releaseDate: v.optional(v.string()),
     coverImageUrl: v.optional(v.string()),
   })
@@ -58,7 +56,7 @@ export default defineSchema({
     spotifyId: v.optional(v.string()),
     appleMusicId: v.optional(v.string()),
     title: v.string(),
-    artistId: v.optional(v.id("artists")), // FIX: Make artistId optional in schema
+    artistId: v.optional(v.id("artists")), 
     albumId: v.optional(v.id("albums")),
     durationMs: v.optional(v.number()),
     previewUrl: v.optional(v.string()),
@@ -86,13 +84,12 @@ export default defineSchema({
 
   userPlatformAccounts: defineTable({
     userId: v.id("users"), // The Convex user ID
-    platform: v.union(v.literal("spotify"), v.literal("apple_music")), // Consistent casing
+    platform: v.union(v.literal("spotify"), v.literal("appleMusic")), // Consistent casing
     platformUserId: v.string(), // The user's ID on Spotify/Apple Music (e.g., Spotify ID for the user)
-    accessToken: v.string(), // **Crucial: Store Encrypted!**
-    refreshToken: v.string(), // **Crucial: Store Encrypted!**
+    accessToken: v.string(), // Store Encrypted
+    refreshToken: v.string(), // Store Encrypted
     expiresAt: v.number(), // Unix timestamp of token expiry
     scope: v.string(), // Permissions granted by the user
   })
     .index("by_userId_platform", ["userId", "platform"]), // Ensure a user only has one account per platform
-  // Consider an index by platformUserId if you ever need to lookup by external ID
 });

@@ -1,4 +1,3 @@
-// src/app/page.tsx
 import { currentUser } from "@clerk/nextjs/server";
 import { SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
@@ -19,7 +18,7 @@ export default async function LandingPage() {
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-8 py-16">
         {/* <div className="relative h-28 w-28 sm:h-36 sm:w-36">
           <Image
-            src="/musishare-logo.svg" // Make sure you have this in your public folder
+            src="/musishare-logo.svg" 
             alt="Musishare Logo"
             layout="fill"
             objectFit="contain"

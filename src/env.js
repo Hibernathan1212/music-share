@@ -1,4 +1,3 @@
-// src/env.ts
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
@@ -7,15 +6,14 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-    ENCRYPTION_KEY: z.string().min(1), // Ensure these are not empty
+    ENCRYPTION_KEY: z.string().min(1), 
     SPOTIFY_CLIENT_SECRET: z.string().min(1),
     CLERK_WEBHOOK_SECRET: z.string(),
-    // CLERK_SECRET_KEY: z.string().min(1), // Add Clerk Secret Key here
   },
 
   client: {
-    NEXT_PUBLIC_CLERK_FRONTEND_API_URL: z.string().min(1), // Use publishable key
-    NEXT_PUBLIC_SPOTIFY_REDIRECT_URI: z.string().url(), // Must be a valid URL
+    NEXT_PUBLIC_CLERK_FRONTEND_API_URL: z.string().min(1), 
+    NEXT_PUBLIC_SPOTIFY_REDIRECT_URI: z.string().url(),
     NEXT_PUBLIC_SPOTIFY_CLIENT_ID: z.string().min(1),
     NEXT_PUBLIC_CONVEX_URL: z.string().url(),
   },
@@ -29,7 +27,6 @@ export const env = createEnv({
     SPOTIFY_CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET,
     NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,
     CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET, 
-    // CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY, // Ensure this is loaded if used directly in env
   },
   emptyStringAsUndefined: true,
 });

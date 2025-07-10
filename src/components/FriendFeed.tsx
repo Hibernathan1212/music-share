@@ -1,4 +1,3 @@
-// src/components/FriendFeed.tsx
 "use client";
 
 import { useQuery } from "convex/react";
@@ -6,15 +5,8 @@ import { api } from "../../convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
 import { Link, Music, PlusCircle, User } from "lucide-react";
-import { formatDistanceToNow } from "date-fns"; // For time ago formatting
+import { formatDistanceToNow } from "date-fns"; 
 import { Button } from "./ui/button";
 
 interface SongDisplayProps {
@@ -29,7 +21,7 @@ interface SongDisplayProps {
     displayName?: string | null;
     profilePictureUrl?: string | null;
   };
-  listenedAt: number; // Unix timestamp
+  listenedAt: number; 
 }
 
 const SongDisplay: React.FC<SongDisplayProps> = ({
@@ -58,7 +50,7 @@ const SongDisplay: React.FC<SongDisplayProps> = ({
         <img
           src={song.coverImageUrl}
           alt={`Album cover for ${song.title}`}
-          className="h-16 w-16 flex-shrink-0 rounded-md object-cover shadow-soft" // Added shadow
+          className="h-16 w-16 flex-shrink-0 rounded-md object-cover shadow-soft" 
         />
       ) : (
         <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground shadow-inset-soft">
@@ -91,19 +83,18 @@ const SongDisplay: React.FC<SongDisplayProps> = ({
 export function FriendFeed() {
   const { isLoaded, isSignedIn } = useUser();
   const convexUser = useQuery(
-    api.queries.users.getMe, // Using the centralized getMe from convex/users.ts
+    api.queries.users.getMe, 
     !isLoaded || !isSignedIn ? "skip" : undefined,
   );
 
   const friendFeed = useQuery(
-    api.queries.music.getFriendFeed, // This now queries the new logic
+    api.queries.music.getFriendFeed, 
     isLoaded && isSignedIn && convexUser
       ? { userId: convexUser._id, limit: 20 }
       : "skip",
   );
 
   if (!isLoaded || !isSignedIn || !convexUser || friendFeed === undefined) {
-    // Show loading state until all data is ready
     return (
       <div className="space-y-4">
         {Array.from({ length: 5 }, (_, i) => (
@@ -136,7 +127,7 @@ export function FriendFeed() {
     <div className="space-y-4">
       {friendFeed.map((entry) => (
         <SongDisplay
-          key={String(entry._id)} // _id is now the user's _id from friendFeed structure
+          key={String(entry._id)} 
           song={{
             title: entry.song?.title ?? "Unknown Song",
             artist: entry.song?.artist ?? "Unknown Artist",
