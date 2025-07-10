@@ -201,9 +201,11 @@ export const upsertFromClerk = internalMutation({
   args: { data: v.any() as Validator<UserJSON> }, // no runtime validation, trust Clerk
   async handler(ctx, { data }) {
     const userAttributes = {
-      displayName: `${data.first_name} ${data.last_name}`,
+      displayName: `${data.first_name} ${data.last_name ?? ""}`,
       clerkId: data.id,
       username: "",
+      profilePictureUrl: data.image_url,
+      email: JSON.stringify(data.email_addresses[0]),
     };
 
     const user = await userByExternalId(ctx, data.id);

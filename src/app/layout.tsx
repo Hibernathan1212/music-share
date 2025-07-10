@@ -10,7 +10,7 @@ import { Toaster } from "~/components/ui/sonner";
 export const metadata: Metadata = {
   title: "Musishare",
   description: "The music sharing platform",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: [{ rel: "icon", url: "/favicon.png" }],
 };
 
 const geist = Geist({

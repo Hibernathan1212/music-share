@@ -186,7 +186,7 @@ export default function FriendsPage() {
           <p className="text-lg text-muted-foreground">
             Loading your profile data...
           </p>
-          <Skeleton className="h-20 w-48 rounded-md shadow-soft" />
+          {/* <Skeleton className="h-20 w-48 rounded-md shadow-soft" /> */}
         </div>
       </div>
     );

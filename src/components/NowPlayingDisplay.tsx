@@ -7,7 +7,7 @@ import { api } from "../../convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
-import { Clock, Music, Headphones, AlertCircle, RefreshCcw, Pause, Play } from "lucide-react";
+import { Clock, Music, Headphones, AlertCircle, RefreshCcw, Pause, Play, ExternalLink } from "lucide-react";
 import ClipLoader from "react-spinners/ClipLoader";
 import Link from "next/link";
 import Image from "next/image";
@@ -203,13 +203,31 @@ export function NowPlayingDisplay() {
             <p className="text-sm text-muted-foreground">
               Loading user profile...
             </p>
-          ) : (
+          ) : (<></>)}
+          
+          {convexUser?.spotifyUserId ? (
             <Link href="/settings">
               <Button className="shadow-soft transition-all hover:scale-[1.02]">
                 Connect Spotify
               </Button>
             </Link>
+          ) : (
+            <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground"
+                asChild
+              >
+                <a
+                  href="https://spotify.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Listen on Spotify <ExternalLink className="ml-1 h-3 w-3" />
+                </a>
+              </Button>
           )}
+            
         </div>
       )}
     </div>

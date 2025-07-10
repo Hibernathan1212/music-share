@@ -10,6 +10,7 @@ import { redirect } from "next/navigation";
 import { Home, Settings, Users, Search, Bell, User } from "lucide-react";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Suspense } from "react"; // For loading states
+import Image from "next/image";
 
 export default async function HomePage() {
   const user = await currentUser();
@@ -27,6 +28,15 @@ export default async function HomePage() {
           className="flex items-center gap-2 text-2xl font-bold text-primary transition-colors hover:text-primary/90"
         >
           <Home className="h-6 w-6" />
+          {/* <div className="h-6 w-6">
+            <img
+              src="/logo.png"
+              alt="Musishare Logo"
+              // layout="fill"
+              // objectFit="contain"
+              className="drop-shadow-lg h-6 w-6"
+            />
+          </div> */}
           Musishare
         </Link>
         <div className="flex items-center gap-4">

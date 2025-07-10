@@ -112,7 +112,7 @@ export default function SettingsPage() {
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-lg text-muted-foreground">Loading your profile...</p>
-          <Skeleton className="h-20 w-48 rounded-md shadow-soft" />
+          {/* <Skeleton className="h-20 w-48 rounded-md shadow-soft" /> */}
         </div>
       </div>
     );
