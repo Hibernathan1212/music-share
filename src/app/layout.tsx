@@ -5,6 +5,7 @@ import { Geist } from "next/font/google";
 import ConvexClientProvider from "~/components/providers/ConvexClientProvider"; 
 import { ThemeProvider } from "~/components/providers/theme-provider"; 
 import { Toaster } from "~/components/ui/sonner"; 
+import { PostHogProvider } from "./_providers/posthog-provider";
 
 export const metadata: Metadata = {
   title: "Musishare",
@@ -33,7 +34,9 @@ export default function RootLayout({
         >
           <ClerkProvider>
             <ConvexClientProvider>
-              {children}
+              <PostHogProvider>
+                {children}
+              </PostHogProvider>
             </ConvexClientProvider>
           </ClerkProvider>
           <Toaster />
