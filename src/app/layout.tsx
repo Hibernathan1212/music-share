@@ -24,24 +24,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${geist.variable}`}>
-      <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ClerkProvider>
-            <ConvexClientProvider>
-              <PostHogProvider>
+    <ClerkProvider>
+      <ConvexClientProvider>
+        <PostHogProvider>
+          <html lang="en" suppressHydrationWarning className={`${geist.variable}`}>
+            <body>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="dark"
+                enableSystem
+                disableTransitionOnChange
+              >
                 {children}
-              </PostHogProvider>
-            </ConvexClientProvider>
-          </ClerkProvider>
-          <Toaster />
-        </ThemeProvider>
-      </body>
-    </html>
+                <Toaster />
+              </ThemeProvider>
+            </body>
+          </html>
+        </PostHogProvider>
+      </ConvexClientProvider>
+    </ClerkProvider>
   );
 }
