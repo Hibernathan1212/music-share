@@ -14,6 +14,7 @@ interface SongDisplayProps {
     title: string;
     artist: string;
     album: string;
+    url: string;
     coverImageUrl?: string | null;
   };
   listeningUser: {
@@ -32,7 +33,13 @@ const SongDisplay: React.FC<SongDisplayProps> = ({
   const timeAgo = formatDistanceToNow(new Date(listenedAt), { addSuffix: true });
 
   return (
-    <div className="flex items-center space-x-4 rounded-lg p-3 transition-colors hover:bg-accent hover:shadow-soft">
+      <a
+        href="https://spotify.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center space-x-4 rounded-lg p-3 transition-colors hover:bg-accent hover:shadow-soft"
+      >
+    {/* <div className="flex items-center space-x-4 rounded-lg p-3 transition-colors hover:bg-accent hover:shadow-soft"> */}
       {" "}
       {/* Added hover shadow */}
       <Avatar className="h-12 w-12 flex-shrink-0">
@@ -76,7 +83,8 @@ const SongDisplay: React.FC<SongDisplayProps> = ({
       <span className="flex-shrink-0 text-xs text-muted-foreground">
         {timeAgo}
       </span>
-    </div>
+    {/* </div> */}
+      </a>
   );
 };
 
@@ -132,6 +140,7 @@ export function FriendFeed() {
             title: entry.song?.title ?? "Unknown Song",
             artist: entry.song?.artist ?? "Unknown Artist",
             album: entry.song?.album ?? "Unknown Album",
+            url: entry.song?.previewUrl ?? "https://spotify.com",
             coverImageUrl: entry.song?.coverImageUrl,
           }}
           listeningUser={{
