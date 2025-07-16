@@ -95,7 +95,7 @@ export default function MyProfilePage() {
   const convexUser = useQuery(
     api.queries.users.getMe,
     !isClerkLoaded || !isSignedIn ? "skip" : undefined,
-  ) as Doc<"users"> | null | undefined; // Explicitly type to access properties
+  ); 
 
   const updateUserProfile = useMutation(api.queries.users.updateUserProfile);
   const checkUsernameAvailability = useQuery(
@@ -319,7 +319,7 @@ export default function MyProfilePage() {
           <div className="flex flex-col items-center gap-6 py-4">
             <Avatar className="h-36 w-36 overflow-hidden rounded-full border-4 border-primary shadow-lg-soft sm:h-40 sm:w-40">
               <AvatarImage
-                src={watchedProfilePictureUrl || clerkUser?.imageUrl || undefined}
+                src={watchedProfilePictureUrl ?? clerkUser?.imageUrl ?? undefined}
                 alt={watchedUsername ?? "User Avatar"}
                 className="h-full w-full object-cover"
               />
@@ -331,12 +331,12 @@ export default function MyProfilePage() {
             </Avatar>
             <div className="text-center">
               <h3 className="text-3xl font-bold text-foreground">
-                {getValues("displayName") ||
-                  getValues("username") ||
+                {getValues("displayName") ??
+                  getValues("username") ??
                   "Set Your Name"}
               </h3>
               <p className="text-xl text-muted-foreground">
-                @{getValues("username") || "username_needed"}
+                @{getValues("username") ?? "username_needed"}
               </p>
             </div>
           </div>
