@@ -1,19 +1,35 @@
 "use client";
 
 import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "../../../../../convex/_generated/api";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
-import { Id } from "../../../../convex/_generated/dataModel";
+import { useRouter, usePathname } from "next/navigation";
+import { Id } from "../../../../../convex/_generated/dataModel";
 import { formatDistanceToNow } from "date-fns";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { useUser } from "@clerk/nextjs";
-import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
-import { Music, Link, Loader2, ArrowLeft, UserRoundCheck, UserPlus, BookOpenText, Clock, Headphones } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "~/components/ui/avatar";
+import {
+  Music,
+  Link as LinkIcon,
+  Loader2,
+  ArrowLeft,
+  UserRoundCheck,
+  UserPlus,
+  BookOpenText,
+  Clock,
+  Headphones,
+} from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
+import Link from "next/link"; // Ensure Link from next/link is imported
 
 interface Song {
   _id: Id<"songs">;
@@ -52,9 +68,11 @@ interface FriendStatus {
 }
 
 const SongDisplay: React.FC<SongDisplayProps> = ({ song, listenedAt }) => {
-  const timeAgo = formatDistanceToNow(new Date(listenedAt), { addSuffix: true });
+  const timeAgo = formatDistanceToNow(new Date(listenedAt), {
+    addSuffix: true,
+  });
   return (
-    <div className="flex items-center space-x-3 rounded-lg p-3 transition-colors hover:bg-accent hover:shadow-soft">
+    <div className="flex transform items-center space-x-4 rounded-lg p-3 transition-all duration-200 hover:bg-accent hover:shadow-soft active:scale-[0.98]">
       {song.coverImageUrl ? (
         <img
           src={song.coverImageUrl}
@@ -67,14 +85,18 @@ const SongDisplay: React.FC<SongDisplayProps> = ({ song, listenedAt }) => {
         </div>
       )}
       <div className="flex-1 overflow-hidden">
-        <p className="line-clamp-1 text-lg font-bold text-foreground">
+        <p className="line-clamp-1 text-lg font-semibold text-foreground">
           {song.title}
         </p>
         <p className="line-clamp-1 text-sm text-muted-foreground">
-          by {song.artist} • {song.album}
+          by {song.artist}
+        </p>
+        <p className="line-clamp-1 text-xs text-muted-foreground">
+          Album: {song.album}
         </p>
       </div>
       <span className="flex-shrink-0 text-xs text-muted-foreground">
+        <Clock className="mr-1 inline-block h-3 w-3" />
         {timeAgo}
       </span>
     </div>
@@ -106,13 +128,14 @@ export default function PublicProfilePage() {
   const unfollowUser = useMutation(api.queries.friends.unfollowUser);
   const friendStatus = useQuery(
     api.queries.friends.getFriendStatus,
-    currentUserConvex && viewedUser ? { targetUserId: viewedUser._id } : "skip"
+    currentUserConvex && viewedUser ? { targetUserId: viewedUser._id } : "skip",
   ) as FriendStatus | undefined;
 
   const [isFollowActionLoading, setIsFollowActionLoading] = useState(false);
 
   const isFollowing = friendStatus?.isFollowing;
 
+  // Redirect if viewing own profile
   useEffect(() => {
     if (
       isClerkLoaded &&
@@ -139,7 +162,8 @@ export default function PublicProfilePage() {
       }
     } catch (error: unknown) {
       console.error("Failed to toggle follow status:", error);
-      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred.";
       toast.error("Failed to update follow status.", {
         description: errorMessage,
       });
@@ -148,19 +172,22 @@ export default function PublicProfilePage() {
     }
   };
 
+  // Render authentication required state
   if (!isClerkLoaded || !isSignedIn) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
         <Card className="w-full max-w-md p-6 text-center shadow-lg-soft">
           <CardHeader>
-            <CardTitle className="text-xl">Authentication Required</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-bold text-primary">
+              Authentication Required
+            </CardTitle>
+            <CardDescription className="text-base text-muted-foreground">
               Please sign in to view user profiles.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Link href="/">
-              <Button className="shadow-soft hover:scale-[1.02]">
+          <CardContent className="pt-4">
+            <Link href="/" className="inline-block">
+              <Button className="w-full min-w-[150px] shadow-soft transition-all duration-200 hover:scale-[1.02]">
                 Go to Sign In
               </Button>
             </Link>
@@ -170,21 +197,22 @@ export default function PublicProfilePage() {
     );
   }
 
+  // Render invalid URL state
   if (!usernameFromUrl) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
         <Card className="w-full max-w-md p-6 text-center shadow-lg-soft">
           <CardHeader>
-            <CardTitle className="text-xl text-destructive">
+            <CardTitle className="text-2xl font-bold text-destructive">
               Invalid Profile URL
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-base text-muted-foreground">
               The username in the URL is missing or invalid.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Link href="/home">
-              <Button className="shadow-soft hover:scale-[1.02]">
+          <CardContent className="pt-4">
+            <Link href="/home" className="inline-block">
+              <Button className="w-full min-w-[150px] shadow-soft transition-all duration-200 hover:scale-[1.02]">
                 Back to Home
               </Button>
             </Link>
@@ -194,31 +222,48 @@ export default function PublicProfilePage() {
     );
   }
 
-  if (viewedUser === undefined || currentUserConvex === undefined || friendStatus === undefined) {
+  // Render loading state for user data
+  if (
+    viewedUser === undefined ||
+    currentUserConvex === undefined ||
+    friendStatus === undefined
+  ) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-lg text-muted-foreground">Loading user profile...</p>
-          <Skeleton className="h-64 w-96 rounded-lg shadow-soft" />
+        <div className="flex flex-col items-center gap-6">
+          <Loader2 className="h-16 w-16 animate-spin text-primary" />
+          <p className="text-xl font-medium text-muted-foreground">
+            Loading user profile...
+          </p>
+          <div className="w-96 space-y-4">
+            <Skeleton className="h-32 w-32 rounded-full" />
+            <Skeleton className="h-8 w-64 rounded-md" />
+            <Skeleton className="h-6 w-48 rounded-md" />
+            <Skeleton className="h-10 w-40 rounded-full" />
+            <Skeleton className="h-24 w-full rounded-lg" />
+            <Skeleton className="h-20 w-full rounded-lg" />
+          </div>
         </div>
       </div>
     );
   }
 
+  // Render user not found state
   if (viewedUser === null) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
         <Card className="w-full max-w-md p-6 text-center shadow-lg-soft">
           <CardHeader>
-            <CardTitle className="text-xl text-destructive">User Not Found</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-bold text-destructive">
+              User Not Found
+            </CardTitle>
+            <CardDescription className="text-base text-muted-foreground">
               The profile for @{usernameFromUrl} does not exist.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Link href="/search">
-              <Button className="shadow-soft hover:scale-[1.02]">
+          <CardContent className="pt-4">
+            <Link href="/search" className="inline-block">
+              <Button className="w-full min-w-[150px] shadow-soft transition-all duration-200 hover:scale-[1.02]">
                 Search for Users
               </Button>
             </Link>
@@ -230,104 +275,101 @@ export default function PublicProfilePage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-background p-4 text-foreground">
-      <Card className="container mx-auto mt-8 w-full max-w-2xl p-6 shadow-lg-soft">
-        <CardHeader className="flex flex-row items-center justify-between p-0 pb-6">
-          <Link href="/home">
-            <Button
-              variant="ghost"
-              className="group text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />{" "}
-              Back to Home
-            </Button>
-          </Link>
-          <CardTitle className="text-3xl font-bold text-primary">
-            {viewedUser.displayName ?? viewedUser.username}&apos;s Profile
+      <Card className="container mx-auto m-8 w-full max-w-2xl p-6 shadow-lg-soft sm:p-8">
+        <CardHeader className="mb-6 flex flex-row items-center justify-between px-0 py-0 sm:mb-8">
+          <CardTitle className="flex-grow text-center text-4xl font-extrabold text-primary sm:text-5xl">
+            Profile
           </CardTitle>
-          <div className="w-[88px]" />
         </CardHeader>
 
-        <CardContent className="space-y-8 p-0 pt-6">
-          <div className="flex flex-col items-center gap-4">
-            <Avatar className="h-32 w-32 border-2 border-primary shadow-lg-soft">
+        <CardContent className="space-y-8 p-0">
+          {/* User Info Section */}
+          <section className="flex flex-col items-center gap-6 py-4">
+            <Avatar className="h-36 w-36 overflow-hidden rounded-full border-4 border-primary shadow-lg-soft sm:h-40 sm:w-40">
               <AvatarImage
                 src={viewedUser.profilePictureUrl ?? undefined}
                 alt={viewedUser.displayName ?? viewedUser.username ?? "User Avatar"}
+                className="h-full w-full object-cover"
               />
-              <AvatarFallback className="text-5xl">
+              <AvatarFallback className="flex h-full w-full items-center justify-center bg-primary text-6xl font-bold text-primary-foreground">
                 {(viewedUser.displayName ?? viewedUser.username ?? "U")
                   .charAt(0)
                   .toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <h3 className="text-3xl font-bold text-foreground">
-              {viewedUser.displayName ?? viewedUser.username}
-            </h3>
-            <p className="text-xl text-muted-foreground">
-              @{viewedUser.username}
-            </p>
+            <div className="text-center">
+              <h3 className="text-4xl font-bold text-foreground">
+                {viewedUser.displayName ?? viewedUser.username}
+              </h3>
+              <p className="text-xl text-muted-foreground">
+                @{viewedUser.username}
+              </p>
+            </div>
             {currentUserConvex && currentUserConvex._id !== viewedUser._id && (
               <Button
                 variant={isFollowing ? "outline" : "default"}
                 onClick={handleFollowToggle}
                 disabled={isFollowActionLoading || !currentUserConvex}
-                className="w-full max-w-[200px] shadow-soft hover:scale-[1.01]"
+                className={`w-full max-w-[220px] rounded-full px-6 py-3 text-lg font-semibold shadow-soft transition-all duration-200 hover:scale-[1.01] ${isFollowing ? 'border-primary text-primary hover:bg-primary/5' : ''}`}
               >
                 {isFollowActionLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Updating...
                   </>
                 ) : isFollowing ? (
                   <>
-                    <UserRoundCheck className="mr-2 h-4 w-4" /> Following
+                    <UserRoundCheck className="mr-2 h-5 w-5" /> Following
                   </>
                 ) : (
                   <>
-                    <UserPlus className="mr-2 h-4 w-4" /> Follow
+                    <UserPlus className="mr-2 h-5 w-5" /> Follow
                   </>
                 )}
               </Button>
             )}
-          </div>
+          </section>
 
-          {(viewedUser.bio ?? (recentlyListened && recentlyListened.length > 0)) ? (
-            <div className="space-y-6">
-              {viewedUser.bio && (
-                <section className="rounded-lg border border-border p-4 shadow-soft">
-                  <h2 className="mb-3 flex items-center gap-2 text-xl font-semibold text-foreground">
-                    <BookOpenText className="h-5 w-5 text-primary" /> Bio
-                  </h2>
-                  <p className="text-muted-foreground">{viewedUser.bio}</p>
-                </section>
-              )}
+          {/* Bio Section */}
+          {viewedUser.bio && (
+            <section className="rounded-xl border border-border bg-card p-5 shadow-soft">
+              <h2 className="mb-4 flex items-center gap-3 text-2xl font-bold text-primary">
+                <BookOpenText className="h-6 w-6" /> Bio
+              </h2>
+              <p className="text-base text-muted-foreground">
+                {viewedUser.bio}
+              </p>
+            </section>
+          )}
 
-              {recentlyListened && recentlyListened.length > 0 && (
-                <section className="rounded-lg border border-border p-4 shadow-soft">
-                  <h2 className="mb-3 flex items-center gap-2 text-xl font-semibold text-foreground">
-                    <Clock className="h-5 w-5 text-primary" /> Recently Listened
-                  </h2>
-                  <div className="space-y-3">
-                    {recentlyListened.map((entry: RecentlyListenedEntry) => (
-                      <SongDisplay
-                        key={String(entry._id)}
-                        song={{
-                          title: entry.song?.title ?? "Unknown Song",
-                          artist: entry.song?.artist ?? "Unknown Artist",
-                          album: entry.song?.album ?? "Unknown Album",
-                          coverImageUrl: entry.song?.coverImageUrl,
-                        }}
-                        listenedAt={entry.listenedAt}
-                      />
-                    ))}
-                  </div>
-                </section>
-              )}
-            </div>
+          {/* Recently Listened Section */}
+          {recentlyListened && recentlyListened.length > 0 ? (
+            <section className="rounded-xl border border-border bg-card p-5 shadow-soft">
+              <h2 className="mb-4 flex items-center gap-3 text-2xl font-bold text-primary">
+                <Headphones className="h-6 w-6" /> Recently Listened
+              </h2>
+              <div className="space-y-4">
+                {recentlyListened.map((entry: RecentlyListenedEntry) => (
+                  <SongDisplay
+                    key={String(entry._id)}
+                    song={{
+                      title: entry.song?.title ?? "Unknown Song",
+                      artist: entry.song?.artist ?? "Unknown Artist",
+                      album: entry.song?.album ?? "Unknown Album",
+                      coverImageUrl: entry.song?.coverImageUrl,
+                    }}
+                    listenedAt={entry.listenedAt}
+                  />
+                ))}
+              </div>
+            </section>
           ) : (
             <div className="flex flex-col items-center justify-center gap-4 py-8 text-center text-muted-foreground">
-              <Headphones className="h-12 w-12" />
-              <p className="text-lg">This user hasn&apos;t added a bio or listened to anything recently.</p>
+              <Headphones className="h-16 w-16 text-muted-foreground" />
+              <p className="text-lg font-medium">
+                This user hasn&apos;t added a bio or listened to anything
+                recently.
+              </p>
             </div>
           )}
         </CardContent>

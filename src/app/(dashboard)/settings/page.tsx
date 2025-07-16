@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { env } from "~/env";
 import { Button } from "~/components/ui/button";
@@ -120,19 +120,9 @@ export default function SettingsPage() {
     <div className="flex min-h-screen flex-col items-center bg-background p-4 text-foreground">
       <Card className="container mx-auto mt-8 w-full max-w-md p-6 shadow-lg-soft">
         <CardHeader className="flex flex-row items-center justify-between p-0 pb-6">
-          <Link href="/home">
-            <Button
-              variant="ghost"
-              className="group text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />{" "}
-              Back to Home
-            </Button>
-          </Link>
-          <CardTitle className="text-3xl font-bold text-primary">
+          <CardTitle className="flex-grow text-center text-4xl font-extrabold text-primary sm:text-5xl">
             Settings
           </CardTitle>
-          <div className="w-[88px]" /> {/* Spacer to align title */}
         </CardHeader>
 
         <CardContent className="space-y-8 p-0 pt-6">

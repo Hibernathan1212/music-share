@@ -50,9 +50,9 @@ export function NowPlayingDisplay() {
       const data = await fetchCurrentPlaying({ userId: stableUserId });
       setCurrentPlaying(data);
       if (!data) {
-        toast.info("No music currently playing on Spotify.", {
-          description: "Start listening to see your status here.",
-        });
+        // toast.info("No music currently playing on Spotify.", {
+        //   description: "Start listening to see your status here.",
+        // });
       }
     } catch (err) {
       console.error("Failed to fetch current playing:", err);

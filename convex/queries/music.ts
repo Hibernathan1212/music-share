@@ -428,6 +428,266 @@ export const storeSong = internalMutation({
   },
 });
 
+
+export const getListenersBySong = query({
+  args: {
+    songId: v.id("songs"),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    // Optionally, add auth check if only logged-in users can see this
+    // const identity = await ctx.auth.getUserIdentity();
+    // if (!identity) {
+    //   throw new Error("Not authenticated");
+    // }
+
+    const listeningHistory = await ctx.db
+      .query("userListeningHistory")
+      .withIndex("by_song", (q) => q.eq("songId", args.songId))
+      .order("desc") // Order by most recent listen for this song
+      .take(args.limit || 100); // Limit results for performance
+
+    const userIdsToFetch = new Set<Id<"users">>();
+    listeningHistory.forEach((entry) => userIdsToFetch.add(entry.userId));
+
+    if (userIdsToFetch.size === 0) {
+      return [];
+    }
+
+    const users = await Promise.all(
+      Array.from(userIdsToFetch).map((id) => ctx.db.get(id)),
+    );
+    const userMap = new Map<Id<"users">, Doc<"users"> | null>(
+      users.map((u) => [u!._id, u]),
+    );
+
+    const hydratedListeners = listeningHistory
+      .map((entry) => {
+        const user = userMap.get(entry.userId);
+        if (!user) {
+          return null; // Should not happen if data integrity is good
+        }
+        return {
+          user: {
+            _id: user._id,
+            username: user.username,
+            displayName: user.displayName,
+            profilePictureUrl: user.profilePictureUrl,
+          },
+          listenedAt: entry.listenedAt, // Include the listen timestamp
+        };
+      })
+      .filter(Boolean); // Remove any null entries
+
+    // Remove duplicates based on user ID and keep the most recent listen per user
+    const uniqueListeners = new Map<Id<"users">, typeof hydratedListeners[0]>();
+    hydratedListeners.forEach((item) => {
+      if (
+        item &&
+        (!uniqueListeners.has(item.user._id) ||
+          item.listenedAt > uniqueListeners.get(item.user._id)!.listenedAt)
+      ) {
+        uniqueListeners.set(item.user._id, item);
+      }
+    });
+
+    if (Array.from(uniqueListeners.values()).length < 2) {
+      return Array.from(uniqueListeners.values());
+    } else {
+      return Array.from(uniqueListeners.values()).sort(
+        (a, b) => b!.listenedAt  - a!.listenedAt,
+      );
+    }
+  },
+});
+
+export const getListenersByArtist = query({
+  args: {
+    artistId: v.id("artists"),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    // Find all songs by this artist
+    const songsByArtist = await ctx.db
+      .query("songs")
+      .withIndex("by_artist", (q) => q.eq("artistId", args.artistId))
+      .collect();
+
+    if (songsByArtist.length === 0) {
+      return [];
+    }
+
+    const songIds = songsByArtist.map((song) => song._id);
+
+    // Get listening history for all these songs
+    // This part can be inefficient if an artist has thousands of songs.
+    // For very large datasets, consider a denormalized `artistListeningHistory` table
+    // or a more advanced search index on `userListeningHistory` that includes `artistId`.
+    const allListens: Doc<"userListeningHistory">[] = [];
+    for (const songId of songIds) {
+      const listens = await ctx.db
+        .query("userListeningHistory")
+        .withIndex("by_song", (q) => q.eq("songId", songId))
+        .collect();
+      allListens.push(...listens);
+    }
+
+    const userIdsToFetch = new Set<Id<"users">>();
+    allListens.forEach((entry) => userIdsToFetch.add(entry.userId));
+
+    if (userIdsToFetch.size === 0) {
+      return [];
+    }
+
+    const users = await Promise.all(
+      Array.from(userIdsToFetch).map((id) => ctx.db.get(id)),
+    );
+    const userMap = new Map<Id<"users">, Doc<"users"> | null>(
+      users.map((u) => [u!._id, u]),
+    );
+
+    const hydratedListeners = allListens
+      .map((entry) => {
+        const user = userMap.get(entry.userId);
+        if (!user) {
+          return null;
+        }
+        return {
+          user: {
+            _id: user._id,
+            username: user.username,
+            displayName: user.displayName,
+            profilePictureUrl: user.profilePictureUrl,
+          },
+          listenedAt: entry.listenedAt,
+        };
+      })
+      .filter(Boolean);
+
+    // Remove duplicates based on user ID and keep the most recent listen per user
+    const uniqueListeners = new Map<Id<"users">, typeof hydratedListeners[0]>();
+    hydratedListeners.forEach((item) => {
+      if (
+        item &&
+        (!uniqueListeners.has(item.user._id) ||
+          item.listenedAt > uniqueListeners.get(item.user._id)!.listenedAt)
+      ) {
+        uniqueListeners.set(item.user._id, item);
+      }
+    });
+
+    if (Array.from(uniqueListeners.values()).length < 2) {
+      return Array.from(uniqueListeners.values());
+    } else {
+      return Array.from(uniqueListeners.values()).sort(
+        (a, b) => b!.listenedAt  - a!.listenedAt,
+      );
+    }
+  },
+});
+
+export const getListenersByAlbum = query({
+  args: {
+    albumId: v.id("albums"),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    // Find all songs in this album
+    const songsInAlbum = await ctx.db
+      .query("songs")
+      .withIndex("by_album", (q) => q.eq("albumId", args.albumId))
+      .collect();
+
+    if (songsInAlbum.length === 0) {
+      return [];
+    }
+
+    const songIds = songsInAlbum.map((song) => song._id);
+
+    const allListens: Doc<"userListeningHistory">[] = [];
+    for (const songId of songIds) {
+      const listens = await ctx.db
+        .query("userListeningHistory")
+        .withIndex("by_song", (q) => q.eq("songId", songId))
+        .collect();
+      allListens.push(...listens);
+    }
+
+    const userIdsToFetch = new Set<Id<"users">>();
+    allListens.forEach((entry) => userIdsToFetch.add(entry.userId));
+
+    if (userIdsToFetch.size === 0) {
+      return [];
+    }
+
+    const users = await Promise.all(
+      Array.from(userIdsToFetch).map((id) => ctx.db.get(id)),
+    );
+    const userMap = new Map<Id<"users">, Doc<"users"> | null>(
+      users.map((u) => [u!._id, u]),
+    );
+
+    const hydratedListeners = allListens
+      .map((entry) => {
+        const user = userMap.get(entry.userId);
+        if (!user) {
+          return null;
+        }
+        return {
+          user: {
+            _id: user._id,
+            username: user.username,
+            displayName: user.displayName,
+            profilePictureUrl: user.profilePictureUrl,
+          },
+          listenedAt: entry.listenedAt,
+        };
+      })
+      .filter(Boolean);
+
+    // Remove duplicates based on user ID and keep the most recent listen per user
+    const uniqueListeners = new Map<Id<"users">, typeof hydratedListeners[0]>();
+    hydratedListeners.forEach((item) => {
+      if (
+        item &&
+        (!uniqueListeners.has(item.user._id) ||
+          item.listenedAt > uniqueListeners.get(item.user._id)!.listenedAt)
+      ) {
+        uniqueListeners.set(item.user._id, item);
+      }
+    });
+
+    if (Array.from(uniqueListeners.values()).length < 2) {
+      return Array.from(uniqueListeners.values());
+    } else {
+      return Array.from(uniqueListeners.values()).sort(
+        (a, b) => b!.listenedAt  - a!.listenedAt,
+      );
+    }
+  },
+});
+
+export const getSongById = query({
+  args: { songId: v.id("songs") },
+  handler: async (ctx, args) => {
+    return ctx.db.get(args.songId);
+  },
+});
+
+export const getArtistById = query({
+  args: { artistId: v.id("artists") },
+  handler: async (ctx, args) => {
+    return ctx.db.get(args.artistId);
+  },
+});
+
+export const getAlbumById = query({
+  args: { albumId: v.id("albums") },
+  handler: async (ctx, args) => {
+    return ctx.db.get(args.albumId);
+  },
+});
+
 export const _getArtistBySpotifyId = internalQuery({
   args: { spotifyId: v.string() },
   handler: async (ctx, args) =>

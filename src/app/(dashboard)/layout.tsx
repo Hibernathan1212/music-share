@@ -10,13 +10,8 @@ import { Home, Settings, Users, Search, Bell, User } from "lucide-react";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Suspense } from "react"; 
 
-export default async function HomePage() {
-  const user = await currentUser();
 
-  if (!user) {
-    redirect("/");
-  }
-
+export default function HomePage(props: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <nav className="sticky top-0 z-50 flex w-full items-center justify-between border-b border-border bg-card/80 px-4 py-3 shadow-lg-soft backdrop-blur-md md:px-8">
@@ -24,7 +19,7 @@ export default async function HomePage() {
           href="/home"
           className="flex items-center gap-2 text-2xl font-bold text-primary transition-colors hover:text-primary/90"
         >
-          <Home className="h-6 w-6" />
+          {/* <Home className="h-6 w-6" /> */}
           {/* <div className="h-6 w-6">
             <img
               src="/logo.png"
@@ -34,7 +29,7 @@ export default async function HomePage() {
               className="drop-shadow-lg h-6 w-6"
             />
           </div> */}
-          Musishare
+          musishare
         </Link>
         <div className="flex items-center gap-4">
           {/* Desktop Navigation */}
@@ -63,54 +58,39 @@ export default async function HomePage() {
                 <User className="mr-2 h-4 w-4" /> Profile
               </Button>
             </Link>
-            <Link href="/settings">
+            {/* <Link href="/settings">
               <Button
                 variant="ghost"
                 className="group text-muted-foreground hover:bg-accent hover:text-foreground"
               >
                 <Settings className="mr-2 h-4 w-4" /> Settings
               </Button>
-            </Link>
+            </Link> */}
             {/* todo: notifications */}
-            <Button
+            {/* <Button
               variant="ghost"
               size="icon"
               className="group text-muted-foreground hover:bg-accent hover:text-foreground"
             >
               <Bell className="h-5 w-5" />
-            </Button>
+            </Button> */}  
           </div>
-          <ToggleTheme />
+          <Link href="/settings">
+              <Button
+                variant="ghost"
+                className="group text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                <Settings className="mr-2 h-4 w-4" />
+              </Button>
+            </Link>
+          {/* <ToggleTheme /> */}
           <UserButton afterSignOutUrl="/" />
         </div>
       </nav>
 
-      <main className="container mx-auto flex w-full flex-1 flex-col gap-8 px-4 py-8 md:flex-row md:gap-12">
-        <section className="sticky top-20 h-fit w-full rounded-lg border border-border bg-card p-6 shadow-lg-soft md:w-1/3">
-          <h2 className="mb-5 text-2xl font-bold text-primary">Your Status</h2>
-          <Suspense fallback={<Skeleton className="h-48 w-full rounded-md" />}>
-            <NowPlayingDisplay />
-          </Suspense>
-        </section>
-
-        <section className="w-full rounded-lg border border-border bg-card p-6 shadow-lg-soft md:w-2/3">
-          <h2 className="mb-5 text-2xl font-bold text-primary">
-            Friends&apos; Listening Stream
-          </h2>
-          <Suspense
-            fallback={
-              <div className="space-y-4">
-                {Array.from({ length: 5 }, (_, i) => (
-                  <Skeleton key={i} className="h-20 w-full rounded-lg" />
-                ))}
-              </div>
-            }
-          >
-            <FriendFeed />
-          </Suspense>
-        </section>
+      <main>
+        {props.children}
       </main>
-
       <nav className="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around border-t border-border bg-card px-4 py-3 shadow-xl-soft md:hidden">
         <Link href="/home" className="flex flex-col items-center text-primary">
           <Home className="h-5 w-5" />
@@ -137,13 +117,13 @@ export default async function HomePage() {
           <User className="h-5 w-5" />
           <span className="text-xs">Profile</span>
         </Link>
-        <Link
+        {/* <Link
           href="/settings"
           className="flex flex-col items-center text-muted-foreground transition-colors hover:text-foreground"
         >
           <Settings className="h-5 w-5" />
           <span className="text-xs">Settings</span>
-        </Link>
+        </Link> */}
       </nav>
     </div>
   );

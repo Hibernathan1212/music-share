@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
@@ -24,8 +24,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { toast } from "sonner";
 import { useState } from "react";
-import { Id } from "../../../convex/_generated/dataModel"; 
-import { Doc } from "../../../convex/_generated/dataModel"; 
+import { Id } from "../../../../convex/_generated/dataModel"; 
+import { Doc } from "../../../../convex/_generated/dataModel"; 
 
 type UserDoc = Doc<"users">; 
 
@@ -45,7 +45,7 @@ const UserListItem: React.FC<UserListItemProps> = ({
   isActionLoading = false,
 }) => {
   return (
-    <div className="flex items-center justify-between rounded-md p-3 transition-colors hover:bg-accent hover:shadow-soft">
+    <div className="flex items-center justify-between rounded-md md:p-3 sm:p-0 transition-colors hover:bg-accent hover:shadow-soft">
       <Link
         href={`/profile/${user.username}`}
         className="flex flex-1 items-center space-x-4"
@@ -206,21 +206,11 @@ export default function FriendsPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-background p-4 text-foreground">
-      <Card className="container mx-auto mt-8 w-full max-w-lg p-6 shadow-lg-soft">
+      <Card className="container mx-auto m-8 w-full max-w-xl p-4 shadow-lg-soft">
         <CardHeader className="flex flex-row items-center justify-between p-0 pb-6">
-          <Link href="/home">
-            <Button
-              variant="ghost"
-              className="group text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />{" "}
-              Back to Home
-            </Button>
-          </Link>
-          <CardTitle className="text-3xl font-bold text-primary">
+          <CardTitle className="flex-grow text-center text-4xl font-extrabold text-primary sm:text-5xl">
             Friends
           </CardTitle>
-          <div className="w-[88px]" /> 
         </CardHeader>
 
         <CardContent className="p-0 pt-6">
